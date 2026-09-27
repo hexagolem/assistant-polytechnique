@@ -93,6 +93,15 @@ export function createApplication(config, dustOverride) {
     ['/style.css', ['style.css','text/css; charset=utf-8']],
     ['/app.js', ['app.js','text/javascript; charset=utf-8']],
     ['/admin.js', ['admin.js','text/javascript; charset=utf-8']],
+    ['/alumnix.css', ['alumnix.css','text/css; charset=utf-8']],
+    ['/experience.js', ['experience.js','text/javascript; charset=utf-8']],
+    ['/assets/polytechnique-x.svg', ['assets/polytechnique-x.svg','image/svg+xml']],
+    ['/assets/portrait-mask.svg', ['assets/portrait-mask.svg','image/svg+xml']],
+    ['/assets/generations.webp', ['assets/generations.webp','image/webp']],
+    ['/assets/bodoni-400.ttf', ['assets/bodoni-400.ttf','font/ttf']],
+    ['/assets/hanken-400.ttf', ['assets/hanken-400.ttf','font/ttf']],
+    ['/assets/hanken-500.ttf', ['assets/hanken-500.ttf','font/ttf']],
+    ['/assets/hanken-600.ttf', ['assets/hanken-600.ttf','font/ttf']],
   ].map(([route,[file,type]]) => [route,{content:readFileSync(resolve(root,'public',file)),type}]));
 
   const audit = (userId,event,jobId=null,code=null) => db.prepare('INSERT INTO audit(user_id,event,created,job_id,code) VALUES(?,?,?,?,?)').run(userId,event,now(),jobId,code);
@@ -129,7 +138,7 @@ export function createApplication(config, dustOverride) {
     res.setHeader('Set-Cookie',`${cookieName}=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=43200${config.local?'':'; Secure'}`);
   }
   function securityHeaders(res) {
-    res.setHeader('Content-Security-Policy',"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'none'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy',"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     res.setHeader('X-Content-Type-Options','nosniff');
     res.setHeader('X-Frame-Options','DENY');
     res.setHeader('Referrer-Policy','no-referrer');

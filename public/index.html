@@ -3,27 +3,39 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="light">
-  <title>Assistant Polytechnique — Test privé</title>
-  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+  <title>AlumniX — Les parcours se croisent ici</title>
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/alumnix.css">
+  <link rel="icon" href="/assets/polytechnique-x.svg" type="image/svg+xml">
+  <script src="/app.js" defer></script><script src="/experience.js" defer></script>
 </head>
-<body>
-  <header class="topbar"><a class="brand" href="/"><span class="mark" aria-hidden="true">P</span><span>Assistant<br><strong>Polytechnique</strong></span></a><span class="tag">TEST PRIVÉ</span></header>
+<body class="alumnix">
+  <header class="site-header"><a class="brand" href="/" aria-label="AlumniX, accueil"><span>Alumni</span><img src="/assets/polytechnique-x.svg" alt="" width="28" height="34"></a></header>
   <main>
-    <section id="login-view" class="login-layout">
-      <div class="intro"><p class="eyebrow">UN POINT D’ENTRÉE POUR VOS RECHERCHES</p><h1>Une question<br>sur l’X&nbsp;?</h1><p class="lead">Consultez les informations de l’annuaire, les classements et les documents disponibles.</p><div class="source-list"><span>Annuaire</span><span>Classements</span><span>Documents</span></div><p class="quiet">Projet indépendant en phase de test.</p></div>
-      <div class="login-card"><p class="eyebrow">SUR INVITATION</p><h2>Accéder au chat</h2><p>Utilise l’adresse e-mail et le code personnel transmis par l’organisateur.</p>
-        <form id="login-form"><label for="email">Adresse e-mail</label><input id="email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="prenom@exemple.fr"><label for="code">Code d’accès</label><input id="code" name="code" type="password" autocomplete="current-password" required maxlength="100" placeholder="Ton code personnel"><button class="primary" id="login-button" type="submit">Ouvrir le chat</button><p id="login-error" class="error" role="alert"></p></form>
-        <p class="fine">Les réponses peuvent contenir des erreurs. Vérifie les sources avant de les utiliser.</p>
+    <section id="login-view" class="access-layout" aria-label="Connexion à AlumniX">
+      <div class="alumni-hero">
+        <div class="hero-copy"><h1>Les parcours<br><mark>se croisent ici.</mark></h1><p>Trouve les anciens qui t’ouvrent<br>de nouvelles perspectives.</p></div>
+        <figure class="generations-art"><img class="portraits" src="/assets/generations.webp" alt="Henri Poincaré, Valéry Giscard d’Estaing, Bernard Arnault et Arthur Mensch, du noir et blanc à la couleur" width="1536" height="1024"></figure>
       </div>
+      <section class="access-card" aria-labelledby="access-title">
+        <div class="access-copy"><h2 id="access-title">Entre dans la conversation.</h2><p>Connecte-toi avec ton adresse e-mail et ton code d’accès.</p></div>
+        <form id="login-form"><div class="login-field"><label for="email">Adresse e-mail</label><input id="email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="prenom@exemple.fr"></div><div class="login-field"><label for="code">Code d’accès</label><input id="code" name="code" type="password" autocomplete="current-password" required maxlength="100" placeholder="Ton code personnel"></div><button class="primary" id="login-button" type="submit">C’est parti <span aria-hidden="true">↗</span></button><p id="login-error" class="error" role="alert"></p></form>
+      </section>
+      <p class="access-note">Un stage, une trajectoire, un classement. Une question suffit pour commencer.</p>
     </section>
-    <section id="chat-view" class="chat-shell" hidden>
-      <aside class="sidebar"><p class="eyebrow">ESPACE DE TEST</p><h2>Tes recherches</h2><button id="new-chat" class="secondary" type="button">+ Nouvelle conversation</button><div class="sidebar-note"><strong>Pour une réponse précise</strong><p>Indique un nom, une promotion, une année ou un document lorsque tu les connais.</p></div><div class="sidebar-bottom"><p id="user-email"></p><p id="quota" class="quota"></p><p class="fine">Quota renouvelé à 00:00 UTC.</p><button id="logout" class="text-button" type="button">Se déconnecter</button></div></aside>
-      <div class="chat-main"><div class="chat-heading"><div><p class="eyebrow">ASSISTANT POLYTECHNIQUE</p><h1>Que cherches-tu&nbsp;?</h1></div><span class="small-tag">BÊTA</span></div>
-        <p id="not-ready" class="notice" hidden>L’organisateur doit encore connecter l’assistant.</p>
-        <div id="messages" class="messages" role="log" aria-label="Conversation" aria-live="polite"><div id="welcome" class="welcome"><h2>Commence une recherche.</h2><p>Demande une information et vérifie les références qui accompagnent la réponse.</p><div class="suggestions"><button type="button" data-prompt="Je cherche une personne dans l’annuaire : ">Retrouver une personne</button><button type="button" data-prompt="Je cherche un classement d’entrée pour l’année ">Consulter un classement</button><button type="button" data-prompt="Quels documents disponibles parlent des césures ?">Trouver un document</button></div></div></div>
-        <div class="composer-wrap"><p id="chat-status" class="status" role="status"></p><form id="chat-form" class="composer"><label class="sr-only" for="question">Ta question</label><textarea id="question" rows="2" maxlength="2000" required placeholder="Écris ta question…"></textarea><button class="primary" id="send" type="submit">Envoyer</button></form><p class="fine">Tes questions et réponses sont traitées par Dust. Les accès et volumes d’usage sont journalisés pour organiser le test.</p></div>
+    <section id="chat-view" class="workspace" hidden aria-label="Conversation avec AlumniX">
+      <div class="workspace-bar"><button id="new-chat" class="new-chat" type="button"><span aria-hidden="true">＋</span> Nouvelle conversation</button><details class="account"><summary>Mon espace <span aria-hidden="true">⌄</span></summary><div class="account-popover"><p id="user-email"></p><p id="quota" class="quota"></p><p class="fine">Quota renouvelé à 00:00 UTC.</p><button id="logout" class="text-button" type="button">Se déconnecter</button></div></details></div>
+      <div class="chat-main">
+        <p id="not-ready" class="notice" hidden>L’assistant n’est pas encore connecté. L’organisateur doit terminer sa configuration.</p>
+        <div id="messages" class="messages" role="log" aria-label="Conversation" aria-live="polite">
+          <div id="welcome" class="welcome"><div class="alumni-hero">
+            <div class="hero-copy"><h1>Les parcours<br><mark>se croisent ici.</mark></h1><p>Trouve les anciens qui t’ouvrent<br>de nouvelles perspectives.</p></div>
+            <figure class="generations-art"><img class="portraits" src="/assets/generations.webp" alt="Henri Poincaré, Valéry Giscard d’Estaing, Bernard Arnault et Arthur Mensch, quatre générations de polytechniciens" width="1536" height="1024"></figure>
+          </div></div>
+        </div>
+        <div id="waiting-visual" class="waiting-visual" hidden><canvas id="waiting-orb" aria-hidden="true" width="260" height="260"></canvas><p class="network-caption" role="status" aria-live="polite">Ton réseau s’active.</p></div>
+        <div class="composer-wrap"><p id="chat-status" class="status" role="status"></p><form id="chat-form" class="composer"><label class="sr-only" for="question">Ta question</label><textarea id="question" rows="2" maxlength="2000" required placeholder="Je cherche un stage en finance…"></textarea><div class="composer-bottom"><span class="composer-hint">Pose ta question à AlumniX.</span><button class="primary" id="send" type="submit" aria-label="Envoyer la question"><span aria-hidden="true">↑</span></button></div></form><div class="suggestions"><button type="button" data-prompt="Quels anciens travaillent en finance et pourraient m’aider à trouver un stage ?">Trouver un stage <span aria-hidden="true">↗</span></button><button type="button" data-prompt="Quels anciens ont un parcours dans la recherche en intelligence artificielle ?">Explorer un parcours <span aria-hidden="true">↗</span></button><button type="button" data-prompt="Je cherche un classement d’entrée pour l’année ">Consulter un classement <span aria-hidden="true">↗</span></button></div><p class="fine response-note">Vérifie les sources des réponses. <span>Tes échanges sont traités par Dust ; les accès et volumes d’usage sont journalisés.</span></p></div>
       </div>
     </section>
   </main>
-  <footer id="login-footer"><span>Assistant Polytechnique · Test privé</span><a href="/admin">Administration</a></footer>
+  <footer class="site-footer"><div id="login-footer"><span>AlumniX</span><a href="/admin">Administration</a></div><details class="photo-credits"><summary>Crédits photos</summary><p>Photomontage retouché avec l’outil de génération d’images : détourage, assemblage et couleur. <a href="https://commons.wikimedia.org/wiki/File:Henri_Poincar%C3%A9_sitting.jpg" target="_blank" rel="noreferrer">Poincaré — Henri Manuel</a> et <a href="https://commons.wikimedia.org/wiki/File:Val%C3%A9ry_Giscard_d%E2%80%99Estaing_1978(2).jpg" target="_blank" rel="noreferrer">Giscard — gouvernement des États-Unis</a> : domaine public. <a href="https://commons.wikimedia.org/wiki/File:Bernard_Arnault_(2)_-_2017_(cropped).jpg" target="_blank" rel="noreferrer">Arnault — Jérémy Barande / École polytechnique</a> : <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noreferrer">CC BY-SA 2.0</a>. <a href="https://commons.wikimedia.org/wiki/File:Arthur_Mensch.jpg" target="_blank" rel="noreferrer">Mensch — Slush</a> : <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>. Montage : CC BY-SA 4.0. Forme du X issue du <a href="https://www.polytechnique.edu/presse/kit-media" target="_blank" rel="noreferrer">kit officiel de Polytechnique</a>, adaptée à la palette AlumniX.</p></details></footer>
 </body></html>

@@ -1,0 +1,120 @@
+@font-face{font-family:Alumni Bodoni;src:url('/assets/bodoni-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Alumni Hanken;src:url('/assets/hanken-400.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:Alumni Hanken;src:url('/assets/hanken-500.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:Alumni Hanken;src:url('/assets/hanken-600.ttf') format('truetype');font-weight:600;font-display:swap}
+body.alumnix{--ink:#153f3b;--muted:#60766b;--blue:#28634e;--blue-dark:#204d3e;--border:#cfdcce;--bg:#f7f9f6;--red:#a13639;background:var(--bg);color:var(--ink);font-family:Alumni Hanken,Arial,sans-serif;min-height:100dvh}
+.alumnix button:focus-visible,.alumnix a:focus-visible,.alumnix input:focus-visible,.alumnix textarea:focus-visible,.alumnix summary:focus-visible{outline:2px solid #28634e;outline-offset:5px}
+.alumnix .site-header{max-width:1440px;margin:auto;padding:31px 5%;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.alumnix .brand{display:inline-flex;align-items:center;gap:3px;font:400 35px/1 'Alumni Bodoni',Georgia,serif;letter-spacing:-1.9px;text-decoration:none;color:var(--ink)}
+.alumnix .brand img{display:block;width:29px;height:36px;object-fit:contain}
+.alumnix .header-note{font-size:12px;color:var(--muted)}
+.alumnix .access-layout,.alumnix .workspace{width:min(100% - 64px,1080px);margin:0 auto}
+.alumnix .alumni-hero{max-width:1000px;margin:30px auto 35px;min-height:326px;display:grid;grid-template-columns:minmax(0,49fr) minmax(0,51fr);align-items:center}
+.alumnix .hero-copy{min-width:0;padding-left:5px}
+.alumnix .hero-copy h1{font:400 clamp(44px,4.7vw,66px)/1.13 'Alumni Bodoni',Georgia,serif;letter-spacing:-2.7px;margin:0 0 23px;color:var(--ink)}
+.alumnix mark{color:inherit;background:linear-gradient(transparent 14%,#e1edc0 14%,#e1edc0 87%,transparent 87%);box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:0 3px 2px 0}
+.alumnix .hero-copy p{color:#506c67;font-size:16px;line-height:1.65;margin:0;max-width:370px}
+.alumnix .generations-art{margin:0;position:relative;min-width:0;width:100%;height:320px}
+.alumnix .hero-x{position:absolute;width:83px;height:122px;object-fit:contain;left:11%;top:51%;transform:translate(-50%,-50%);z-index:1}
+.alumnix .portraits{position:absolute;display:block;width:92%;height:auto;left:4%;top:47%;transform:translateY(-50%);mask-image:url('/assets/portrait-mask.svg');mask-size:100% 100%;mask-repeat:no-repeat}
+.alumnix .generations-art figcaption{position:absolute;left:16%;right:0;bottom:8px;display:flex;justify-content:space-between;gap:5px;color:#60766b;font-size:11px;text-align:center}
+.alumnix figcaption small{display:block;font-size:10px;margin-top:2px;color:#60766b}
+.alumnix .access-card{max-width:1000px;margin:auto;border:1px solid var(--border);background:#fff;border-radius:9px;padding:26px 30px 29px}
+.alumnix .access-copy h2{font:400 27px/1.3 'Alumni Bodoni',Georgia,serif;letter-spacing:-.8px;margin:0 0 5px}
+.alumnix .access-copy p{font-size:14px;color:var(--muted);margin:0 0 22px}
+.alumnix #login-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr) auto;gap:16px;align-items:end}
+.alumnix #login-form label{margin:0 0 8px;font-size:12px;font-weight:500}
+.alumnix input{border:1px solid #c5d4c9;border-radius:5px;background:#fbfcfa;min-height:48px;font-size:16px}
+.alumnix #login-button{width:auto;margin:0;min-height:49px;font-weight:500;border-radius:5px;display:flex;gap:22px;align-items:center;justify-content:center}
+.alumnix #login-error{grid-column:1/-1;margin:0}
+.alumnix .access-note{text-align:center;font-size:13px;color:var(--muted);margin:23px 0 38px}
+.alumnix .workspace-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;max-width:1000px;margin:8px auto 0;padding:10px 0 7px}
+.alumnix .new-chat{font-size:13px;min-height:42px;display:flex;align-items:center;gap:8px;border:0;background:none;color:#3d625b;padding:6px 0}
+.alumnix .new-chat span{font-size:22px;line-height:1}
+.alumnix .account{position:relative;font-size:13px}
+.alumnix .account summary{cursor:pointer;list-style:none;min-height:42px;padding:11px 0 11px 12px}
+.alumnix .account summary::-webkit-details-marker{display:none}
+.alumnix .account summary span{margin-left:15px}
+.alumnix .account-popover{position:absolute;right:0;top:48px;z-index:5;background:#fff;border:1px solid var(--border);border-radius:8px;width:min(280px,calc(100vw - 40px));padding:22px;box-shadow:0 12px 40px #163a2a12}
+.alumnix .account-popover p{overflow-wrap:anywhere;margin:0 0 8px;font-size:13px}
+.alumnix .account-popover .fine{font-size:11px}
+.alumnix .account-popover .quota{font-weight:500}
+.alumnix .chat-main{display:flex;flex-direction:column;min-width:0;height:auto;min-height:calc(100dvh - 270px)}
+.alumnix .messages{flex:none;overflow:visible;padding:0;min-width:0}
+.alumnix .welcome{max-width:none;margin:0}
+.alumnix .welcome .alumni-hero{margin-top:10px;margin-bottom:15px;min-height:340px}
+.alumnix .composer-wrap{width:100%;max-width:1000px;margin:0 auto;padding:0 0 12px}
+.alumnix .composer{display:block;background:white;border:1px solid #b9cdbf;border-radius:8px;padding:18px 19px 12px;box-shadow:0 5px 25px #24453204}
+.alumnix .composer:focus-within{border-color:#547e62;box-shadow:0 0 0 2px #28634e0c}
+.alumnix .composer textarea{padding:0;min-height:53px;height:53px;max-height:150px;width:100%;border:0;background:none;border-radius:2px;resize:none;color:var(--ink);font-size:16px}
+.alumnix .composer textarea::placeholder{color:#67807a}
+.alumnix .composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.alumnix .composer-hint{font-size:12px;color:#607670}
+.alumnix #send{width:44px;height:44px;min-width:44px;border-radius:50%;padding:0;margin:0;display:grid;place-items:center;background:#284d3d;color:#fff;font-size:26px;font-weight:400}
+.alumnix #send:hover:not(:disabled){background:#3a6750;transform:translateY(-1px)}
+.alumnix .suggestions{display:flex;flex-wrap:wrap;gap:0 26px;margin:12px 0 0}
+.alumnix .suggestions button{border:0;border-radius:0;background:none;color:#3d625b;font-size:13px;padding:10px 0;min-height:44px}
+.alumnix .suggestions span{margin-left:4px;color:#718b7a}
+.alumnix .suggestions button:hover{text-decoration:underline;text-underline-offset:5px}
+.alumnix .response-note{margin:16px 0 0!important;font-size:11px!important;line-height:1.6;color:#60766b}
+.alumnix .response-note span{opacity:1}
+.alumnix .status:empty{display:none}
+.alumnix .status{font-size:13px;margin:8px 0 12px;min-height:0;color:#7b463d}
+.alumnix .is-waiting .status{color:var(--muted)}
+.alumnix .notice{background:#eef2e5;border-color:#89a87b;border-radius:3px;color:#39513a;margin:18px auto;width:100%;max-width:1000px}
+.alumnix .has-conversation{max-width:850px;margin:0 auto;padding-top:30px}
+.alumnix .has-conversation .messages{flex:1;padding:0 0 20px}
+.alumnix .has-conversation .suggestions{display:none}
+.alumnix .has-conversation .composer-wrap{position:sticky;bottom:0;background:linear-gradient(#f7f9f600,#f7f9f6 16px);padding:22px 0 16px;margin-top:auto;z-index:2}
+.alumnix .has-conversation .composer{border-radius:18px 18px 6px 18px}
+.alumnix .message{max-width:100%;margin:0 0 34px}
+.alumnix .message-label{font-size:12px;text-transform:none;letter-spacing:.015em;font-weight:500;color:#557060;margin-bottom:10px}
+.alumnix .message.user{border:0;margin-left:auto;max-width:80%;width:fit-content;background:#e9efdf;padding:14px 21px;border-radius:18px 18px 4px 18px}
+.alumnix .message.user .message-label{font-size:11px;margin-bottom:5px}
+.alumnix .message.assistant{border:0;background:transparent;padding:0}
+.alumnix .message.assistant .message-label{display:flex;align-items:center;gap:9px;font-family:'Alumni Bodoni',Georgia,serif;font-size:23px;color:#28634e;font-weight:400;letter-spacing:-.4px;margin-bottom:13px}
+.alumnix .message.assistant .message-label::before{content:'';display:block;width:18px;height:23px;background:url('/assets/polytechnique-x.svg') center/contain no-repeat}
+.alumnix .message-body{font-size:16px;line-height:1.8;color:#284538;white-space:pre-wrap}
+.alumnix .feedback{font-size:12px;margin-top:21px;gap:12px;color:#60766b;flex-wrap:wrap}
+.alumnix .feedback button{border:1px solid #d9e2d3;background:transparent;color:#50654e;border-radius:50px;padding:6px 13px;min-height:34px}
+.alumnix .feedback button:hover{background:#e9efdf;border-color:#a0b499}
+.alumnix .waiting-visual{display:flex;gap:15px;align-items:center;margin:0 0 25px;min-height:160px}
+.alumnix #waiting-orb{display:block;width:160px;height:160px;flex:none}
+.alumnix .waiting-copy p{font-family:'Alumni Bodoni',Georgia,serif;font-size:26px;letter-spacing:-.7px;line-height:1.3;margin:4px 0 8px}
+.alumnix .waiting-name{font-size:12px;color:#60766b}
+.alumnix #pause-motion{font-size:11px;padding:5px 0;color:#60766b;min-height:32px}
+.alumnix .site-footer{max-width:1440px;margin:24px auto 0;padding:20px 5% 24px;display:flex;align-items:flex-start;gap:28px;font-size:11px;color:#60766b}
+.alumnix #login-footer{display:flex;gap:28px;align-items:center;white-space:nowrap}
+.alumnix .photo-credits{margin-left:auto;max-width:720px;text-align:right}
+.alumnix .photo-credits summary{cursor:pointer;min-height:30px}
+.alumnix .photo-credits p{font-size:11px;line-height:1.65;text-align:left;margin:12px 0 0}
+.alumnix .photo-credits p a{text-decoration:underline;text-underline-offset:2px}
+@media(min-width:1440px){.alumnix .alumni-hero{margin-top:50px;margin-bottom:45px;min-height:375px}}
+@media(max-width:820px){.alumnix .site-header{padding:25px 26px}.alumnix .header-note{max-width:180px;text-align:right}.alumnix .access-layout,.alumnix .workspace{width:calc(100% - 44px)}.alumnix .hero-copy h1{font-size:49px;letter-spacing:-2px}.alumnix .hero-copy p{font-size:14px}.alumnix .hero-x{width:63px;height:90px}.alumnix .generations-art{height:285px}.alumnix #login-form{grid-template-columns:1fr 1fr}.alumnix #login-button{grid-column:1/-1}.alumnix .access-card{padding:24px}.alumnix .chat-main{min-height:calc(100dvh - 260px)}}
+@media(max-width:640px){.alumnix .site-header{padding:23px 22px 17px}.alumnix .brand{font-size:31px}.alumnix .brand img{height:32px;width:26px}.alumnix .header-note{display:none}.alumnix .alumni-hero,.alumnix .welcome .alumni-hero{grid-template-columns:minmax(0,1fr);gap:6px;margin:32px auto 23px;min-height:0}.alumnix .hero-copy{padding:0}.alumnix .hero-copy h1{font-size:49px;margin-bottom:17px}.alumnix .hero-copy p{font-size:15px}.alumnix .generations-art{width:100%;max-width:410px;height:250px;justify-self:center}.alumnix .generations-art figcaption{bottom:1px}.alumnix .hero-x{left:9%;top:49%;width:64px;height:91px}.alumnix .portraits{left:4%;width:92%;top:47%}.alumnix .generations-art figcaption{left:15%;font-size:10px}.alumnix .access-card{padding:22px 19px}.alumnix .access-copy h2{font-size:25px}.alumnix #login-form{grid-template-columns:minmax(0,1fr);gap:17px}.alumnix #login-button{min-height:48px}.alumnix .access-note{text-align:left;font-size:12px;line-height:1.7;margin:22px 0}.alumnix .workspace-bar{margin-top:0}.alumnix .new-chat,.alumnix .account{font-size:12px}.alumnix .composer{padding:15px 15px 10px}.alumnix .composer-hint{font-size:11px}.alumnix .suggestions{gap:0 20px}.alumnix .suggestions button{font-size:12px}.alumnix .response-note{line-height:1.65}.alumnix .response-note span{display:block;margin-top:3px}.alumnix .has-conversation{padding-top:24px}.alumnix .message.user{max-width:92%;padding:12px 17px}.alumnix .message-body{font-size:15px}.alumnix .waiting-visual{gap:8px;min-height:130px}.alumnix #waiting-orb{width:120px;height:120px}.alumnix .waiting-copy p{font-size:23px}.alumnix .site-footer{padding:17px 22px 20px;gap:15px;margin-top:8px;flex-wrap:wrap}.alumnix #login-footer{gap:17px}.alumnix .photo-credits{margin-left:0;text-align:left}.alumnix .chat-main{min-height:calc(100dvh - 240px)}}
+@media(max-width:370px){.alumnix .hero-copy h1{font-size:42px;letter-spacing:-1.9px}.alumnix .generations-art{height:215px}.alumnix .hero-x{width:53px;height:79px}.alumnix .composer-hint{max-width:165px}.alumnix .waiting-copy p{font-size:21px}.alumnix #waiting-orb{width:98px;height:98px}}
+@media(prefers-reduced-motion:reduce){.alumnix *{scroll-behavior:auto!important;transition:none!important}.alumnix #send:hover:not(:disabled){transform:none}}
+/* Compact illustration on phones; the composer remains the primary action. */
+@media(max-width:640px){.alumnix .generations-art{height:205px;max-width:360px}.alumnix .portraits{top:48%}.alumnix .welcome .alumni-hero{margin-top:22px;gap:0}.alumnix .photo-credits summary{min-height:44px}.alumnix .feedback button{min-height:44px}}
+@media(max-width:370px){.alumnix .generations-art{height:180px}.alumnix .hero-copy h1{font-size:40px}}
+/* Balanced framing on the landing screen. */
+.alumnix .alumni-hero{grid-template-columns:minmax(0,.96fr) minmax(0,1.04fr);column-gap:36px;min-height:300px}
+.alumnix .welcome .alumni-hero{min-height:300px;margin:16px auto 26px}
+.alumnix .hero-copy{padding-left:0}
+.alumnix .generations-art{height:300px}
+.alumnix .portraits{width:100%;left:0;top:46%;transform:translateY(-50%)}
+/* A single full-screen waiting scene, independent of page scroll position. */
+.alumnix.network-active{overflow:hidden}
+.alumnix.network-active .site-header,.alumnix.network-active .site-footer,.alumnix.network-active .workspace-bar,.alumnix.network-active .messages,.alumnix.network-active .composer-wrap,.alumnix.network-active #not-ready{visibility:hidden}
+.alumnix .waiting-visual{position:fixed;inset:0;z-index:20;margin:0;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;min-height:0;background:var(--bg);opacity:0;transition:opacity 280ms ease}
+.alumnix .waiting-visual.is-visible{opacity:1}
+.alumnix #waiting-orb{width:clamp(190px,27vw,270px);height:clamp(190px,27vw,270px);transform:translateY(10px) scale(.94);transition:transform 600ms cubic-bezier(.22,1,.36,1)}
+.alumnix .waiting-visual.is-visible #waiting-orb{transform:translateY(0) scale(1)}
+.alumnix .network-caption{font:400 clamp(25px,3vw,32px)/1.3 'Alumni Bodoni',Georgia,serif;letter-spacing:-.8px;margin:0;color:#28634e;text-align:center}
+.alumnix .message.user{display:none}
+.alumnix .message.assistant{animation:answer-arrives 380ms ease both;scroll-margin-top:30px}
+@keyframes answer-arrives{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:820px) and (min-width:641px){.alumnix .alumni-hero{column-gap:20px}.alumnix .hero-copy h1{font-size:45px}.alumnix .generations-art{height:270px}}
+@media(max-width:640px){.alumnix .alumni-hero,.alumnix .welcome .alumni-hero{grid-template-columns:minmax(0,1fr);min-height:0;gap:2px;margin:22px auto 20px}.alumnix .generations-art{height:205px;max-width:350px}.alumnix .portraits{top:47%;width:100%;left:0}.alumnix .waiting-visual{padding:20px;gap:12px}}
+@media(max-width:370px){.alumnix .generations-art{height:180px}}
+@media(prefers-reduced-motion:reduce){.alumnix .message.assistant{animation:none}.alumnix #waiting-orb{transform:none}}
