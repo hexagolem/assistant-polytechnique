@@ -181,9 +181,10 @@
     }
 
     function jumpRunner() {
-      if (!pending || runnerDeadUntil || reducedMotion.matches) return;
+      if (!pending || reducedMotion.matches) return;
+      if (runnerDeadUntil) resetRunner();
       if (runner.grounded) {
-        runner.velocity = -0.57;
+        runner.velocity = -0.37;
         runner.grounded = false;
       }
     }
@@ -332,12 +333,10 @@
       userPaused = !userPaused;
       updateAnimation();
     });
-    if (runnerGame) {
-      runnerGame.addEventListener('keydown', event => {
-        if (event.code === 'Space' || event.code === 'ArrowUp') {event.preventDefault();jumpRunner();}
-      });
-      runnerGame.addEventListener('pointerdown', event => {event.preventDefault();jumpRunner();});
-    }
+    document.addEventListener('keydown', event => {
+      if (pending && (event.code === 'Space' || event.code === 'ArrowUp')) {event.preventDefault();jumpRunner();}
+    });
+    if (runnerGame) runnerGame.addEventListener('pointerdown', event => {event.preventDefault();jumpRunner();});
     document.addEventListener('visibilitychange', updateAnimation);
     reducedMotion.addEventListener('change', updateAnimation);
     window.addEventListener('resize', () => {

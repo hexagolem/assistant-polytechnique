@@ -95,12 +95,12 @@ body.alumnix{--ink:#153f3b;--muted:#60766b;--blue:#28634e;--blue-dark:#204d3e;--
 /* A single full-screen waiting scene, independent of page scroll position. */
 .alumnix.network-active{overflow:hidden}
 .alumnix.network-active .site-header,.alumnix.network-active .site-footer,.alumnix.network-active .workspace-bar,.alumnix.network-active .messages,.alumnix.network-active .composer-wrap,.alumnix.network-active #not-ready{visibility:hidden}
-.alumnix .waiting-visual{position:fixed;inset:0;z-index:20;margin:0;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;min-height:0;background:var(--bg);opacity:0;transition:opacity 280ms ease}
+.alumnix .waiting-visual{position:fixed;inset:0;z-index:20;isolation:isolate;margin:0;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;min-height:0;background:var(--bg);opacity:0;transition:opacity 280ms ease}
 .alumnix .waiting-visual.is-visible{opacity:1}
-.alumnix #waiting-orb{width:clamp(190px,27vw,270px);height:clamp(190px,27vw,270px);transform:translateY(10px) scale(.94);transition:transform 600ms cubic-bezier(.22,1,.36,1)}
+.alumnix #waiting-orb{position:relative;z-index:1;width:clamp(190px,27vw,270px);height:clamp(190px,27vw,270px);transform:translateY(10px) scale(.94);transition:transform 600ms cubic-bezier(.22,1,.36,1)}
 .alumnix .waiting-visual.is-visible #waiting-orb{transform:translateY(0) scale(1)}
-.alumnix .network-caption{font:400 clamp(25px,3vw,32px)/1.3 'Alumni Bodoni',Georgia,serif;letter-spacing:-.8px;margin:0;color:#28634e;text-align:center}
-.alumnix .runner-game{width:min(430px,calc(100vw - 44px));margin-top:8px;outline:none;cursor:pointer;touch-action:manipulation;user-select:none}
+.alumnix .network-caption{position:relative;z-index:1;font:400 clamp(25px,3vw,32px)/1.3 'Alumni Bodoni',Georgia,serif;letter-spacing:-.8px;margin:0;color:#28634e;text-align:center}
+.alumnix .runner-game{position:relative;z-index:2;width:min(430px,calc(100vw - 44px));margin-top:8px;outline:none;cursor:pointer;touch-action:manipulation;user-select:none}
 .alumnix .runner-game:focus-visible{outline:none}
 .alumnix #runner-canvas{display:block;width:100%;height:96px}
 .alumnix .runner-game p{margin:4px 0 0;text-align:center;color:#6b7f73;font-size:10px;letter-spacing:.04em;text-transform:uppercase}
