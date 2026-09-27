@@ -4,6 +4,8 @@
 
 AlumniX est un site qui permet de rechercher, grâce à un **chatbot**, des informations dispersées entre les différentes plateformes de la communauté polytechnicienne. Il suffit de poser une question en français pour explorer les ressources accessibles à l’assistant.
 
+AlumniX repose sur un **RAG agentique** : l’agent Dust choisit les sources pertinentes, les interroge avec ses outils, puis construit sa réponse à partir des informations retrouvées.
+
 ## Pourquoi AlumniX ?
 
 Les informations utiles aux élèves et aux anciens sont réparties entre de nombreux sites : **Sigma, le site de l’AX, Gargantua**, et d’autres ressources. Retrouver un parcours, identifier des anciens dans un secteur ou consulter un classement demande souvent de savoir où chercher et de naviguer entre plusieurs plateformes.
