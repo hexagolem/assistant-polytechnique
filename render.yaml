@@ -1,0 +1,37 @@
+# This blueprint uses PAID compute and a persistent disk. Review Render's price before deploying.
+services:
+  - type: web
+    name: assistant-polytechnique
+    runtime: node
+    plan: 0.5c-512mb
+    region: frankfurt
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    disk:
+      name: acces-testeurs
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 24.21.0
+      - key: ADMIN_SECRET
+        generateValue: true
+      - key: DATA_DIR
+        value: /var/data
+      - key: DAILY_LIMIT
+        value: "20"
+      - key: GLOBAL_DAILY_LIMIT
+        value: "200"
+      - key: MAX_ANSWER_CHARS
+        value: "6000"
+      - key: DUST_ORIGIN
+        value: https://dust.tt
+      - key: DUST_API_KEY
+        sync: false
+      - key: DUST_WORKSPACE_ID
+        sync: false
+      - key: DUST_AGENT_ID
+        sync: false

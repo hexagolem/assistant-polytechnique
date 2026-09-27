@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="color-scheme" content="light">
+  <title>Assistant Polytechnique — Test privé</title>
+  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/"><span class="mark" aria-hidden="true">P</span><span>Assistant<br><strong>Polytechnique</strong></span></a><span class="tag">TEST PRIVÉ</span></header>
+  <main>
+    <section id="login-view" class="login-layout">
+      <div class="intro"><p class="eyebrow">UN POINT D’ENTRÉE POUR VOS RECHERCHES</p><h1>Une question<br>sur l’X&nbsp;?</h1><p class="lead">Consultez les informations de l’annuaire, les classements et les documents disponibles.</p><div class="source-list"><span>Annuaire</span><span>Classements</span><span>Documents</span></div><p class="quiet">Projet indépendant en phase de test.</p></div>
+      <div class="login-card"><p class="eyebrow">SUR INVITATION</p><h2>Accéder au chat</h2><p>Utilise l’adresse e-mail et le code personnel transmis par l’organisateur.</p>
+        <form id="login-form"><label for="email">Adresse e-mail</label><input id="email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="prenom@exemple.fr"><label for="code">Code d’accès</label><input id="code" name="code" type="password" autocomplete="current-password" required maxlength="100" placeholder="Ton code personnel"><button class="primary" id="login-button" type="submit">Ouvrir le chat</button><p id="login-error" class="error" role="alert"></p></form>
+        <p class="fine">Les réponses peuvent contenir des erreurs. Vérifie les sources avant de les utiliser.</p>
+      </div>
+    </section>
+    <section id="chat-view" class="chat-shell" hidden>
+      <aside class="sidebar"><p class="eyebrow">ESPACE DE TEST</p><h2>Tes recherches</h2><button id="new-chat" class="secondary" type="button">+ Nouvelle conversation</button><div class="sidebar-note"><strong>Pour une réponse précise</strong><p>Indique un nom, une promotion, une année ou un document lorsque tu les connais.</p></div><div class="sidebar-bottom"><p id="user-email"></p><p id="quota" class="quota"></p><p class="fine">Quota renouvelé à 00:00 UTC.</p><button id="logout" class="text-button" type="button">Se déconnecter</button></div></aside>
+      <div class="chat-main"><div class="chat-heading"><div><p class="eyebrow">ASSISTANT POLYTECHNIQUE</p><h1>Que cherches-tu&nbsp;?</h1></div><span class="small-tag">BÊTA</span></div>
+        <p id="not-ready" class="notice" hidden>L’organisateur doit encore connecter l’assistant.</p>
+        <div id="messages" class="messages" role="log" aria-label="Conversation" aria-live="polite"><div id="welcome" class="welcome"><h2>Commence une recherche.</h2><p>Demande une information et vérifie les références qui accompagnent la réponse.</p><div class="suggestions"><button type="button" data-prompt="Je cherche une personne dans l’annuaire : ">Retrouver une personne</button><button type="button" data-prompt="Je cherche un classement d’entrée pour l’année ">Consulter un classement</button><button type="button" data-prompt="Quels documents disponibles parlent des césures ?">Trouver un document</button></div></div></div>
+        <div class="composer-wrap"><p id="chat-status" class="status" role="status"></p><form id="chat-form" class="composer"><label class="sr-only" for="question">Ta question</label><textarea id="question" rows="2" maxlength="2000" required placeholder="Écris ta question…"></textarea><button class="primary" id="send" type="submit">Envoyer</button></form><p class="fine">Tes questions et réponses sont traitées par Dust. Les accès et volumes d’usage sont journalisés pour organiser le test.</p></div>
+      </div>
+    </section>
+  </main>
+  <footer id="login-footer"><span>Assistant Polytechnique · Test privé</span><a href="/admin">Administration</a></footer>
+</body></html>
