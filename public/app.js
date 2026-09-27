@@ -1,7 +1,7 @@
 import {renderAnswer} from './markdown.js';
+import {api,waitForJob} from './api.js';
 const $=id=>document.getElementById(id);
 let threadId=null, busy=false, generation=0;
-async function api(path,data){const r=await fetch(path,{method:data===undefined?'GET':'POST',credentials:'same-origin',headers:data===undefined?{}:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data)});const j=await r.json();if(!r.ok)throw Object.assign(new Error(j.error||'Service indisponible.'),{status:r.status});return j;}
 function quota(user){$('quota').textContent=`${user.used} / ${user.limit} questions aujourd’hui`;}
 function loginView(){generation++;$('chat-view').hidden=true;$('login-view').hidden=false;$('login-footer').hidden=false;threadId=null;}
 async function enter(){const user=await api('/api/me');$('user-email').textContent=user.email;quota(user);$('login-view').hidden=true;$('login-footer').hidden=true;$('chat-view').hidden=false;$('not-ready').hidden=user.ready;$('send').disabled=!user.ready;$('question').disabled=!user.ready;}
@@ -17,12 +17,12 @@ $('chat-form').addEventListener('submit',async e=>{
   busy=true;const active=generation;$('send').disabled=true;$('new-chat').disabled=true;$('question').value='';message('user',text);$('chat-status').textContent='Recherche dans les sources…';
   try{
     const job=await api('/api/chat',{message:text,threadId});if(active!==generation)return;threadId=job.threadId;quota(job);
-    const deadline=Date.now()+300000;
-    while(Date.now()<deadline){await new Promise(r=>setTimeout(r,2000));if(active!==generation)return;const state=await api('/api/jobs/'+job.jobId);if(active!==generation)return;if(state.state==='done'){feedback(message('assistant',state.answer),job.jobId);$('chat-status').textContent='';return;}if(state.state==='error')throw new Error(state.error);}
-    throw new Error('La recherche n’a pas abouti à temps. Elle n’a pas été relancée automatiquement.');
+    const state=await waitForJob(job.jobId,{isActive:()=>active===generation});
+    if(!state||active!==generation)return;
+    feedback(message('assistant',state.answer),job.jobId);$('chat-status').textContent='';
   }catch(err){if(active!==generation)return;if(err.status===401){loginView();$('login-error').textContent=err.message;}else{$('chat-status').textContent=err.message;}}
   finally{busy=false;$('send').disabled=false;$('new-chat').disabled=false;if(active===generation)$('question').focus();}
 });
 $('question').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('chat-form').requestSubmit();}});
-window.addEventListener('pageshow',()=>{if(!$('chat-view').hidden)api('/api/me').then(quota).catch(()=>{clearChat();loginView();});});
+window.addEventListener('pageshow',()=>{if(!$('chat-view').hidden)api('/api/me').then(quota).catch(err=>{if(err.status===401){clearChat();loginView();}});});
 enter().catch(()=>loginView());

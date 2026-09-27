@@ -92,6 +92,7 @@ export function createApplication(config, dustOverride) {
     ['/admin', ['admin.html','text/html; charset=utf-8']],
     ['/style.css', ['style.css','text/css; charset=utf-8']],
     ['/app.js', ['app.js','text/javascript; charset=utf-8']],
+    ['/api.js', ['api.js','text/javascript; charset=utf-8']],
     ['/markdown.js', ['markdown.js','text/javascript; charset=utf-8']],
     ['/vendor/markdown-it-15.0.2.mjs', ['vendor/markdown-it-15.0.2.mjs','text/javascript; charset=utf-8']],
     ['/admin.js', ['admin.js','text/javascript; charset=utf-8']],
