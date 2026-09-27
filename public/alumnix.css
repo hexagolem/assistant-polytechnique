@@ -118,3 +118,39 @@ body.alumnix{--ink:#153f3b;--muted:#60766b;--blue:#28634e;--blue-dark:#204d3e;--
 @media(max-width:640px){.alumnix .alumni-hero,.alumnix .welcome .alumni-hero{grid-template-columns:minmax(0,1fr);min-height:0;gap:2px;margin:22px auto 20px}.alumnix .generations-art{height:205px;max-width:350px}.alumnix .portraits{top:47%;width:100%;left:0}.alumnix .waiting-visual{padding:20px;gap:12px}}
 @media(max-width:370px){.alumnix .generations-art{height:180px}}
 @media(prefers-reduced-motion:reduce){.alumnix .message.assistant{animation:none}.alumnix #waiting-orb{transform:none}}
+/* Agent answers: readable Markdown within the existing AlumniX palette. */
+.alumnix .formatted-answer{white-space:normal;overflow-wrap:anywhere;line-height:1.75}
+.alumnix .message.assistant:focus{outline:none}
+.alumnix .formatted-answer>:first-child{margin-top:0}
+.alumnix .formatted-answer>:last-child{margin-bottom:0}
+.alumnix .formatted-answer p{margin:0 0 1em}
+.alumnix .formatted-answer strong{font-weight:600;color:var(--ink)}
+.alumnix .formatted-answer h2,.alumnix .formatted-answer h3,.alumnix .formatted-answer h4{font-family:'Alumni Hanken',Arial,sans-serif;font-weight:600;line-height:1.35;letter-spacing:-.025em;color:var(--ink);margin:1.6em 0 .65em}
+.alumnix .formatted-answer h2{font-size:1.5em}
+.alumnix .formatted-answer h3{font-size:1.2em}
+.alumnix .formatted-answer h4{font-size:1.05em}
+.alumnix .formatted-answer ul,.alumnix .formatted-answer ol{padding-left:1.5em;margin:.65em 0 1.25em}
+.alumnix .formatted-answer li{padding-left:.2em;margin:.45em 0}
+.alumnix .formatted-answer li::marker{color:#28634e;font-weight:600}
+.alumnix .formatted-answer li>p{margin:.35em 0}
+.alumnix .formatted-answer li>ul,.alumnix .formatted-answer li>ol{margin:.3em 0 .6em}
+.alumnix .formatted-answer a{color:#28634e;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.alumnix .formatted-answer a:hover{color:#153f3b;text-decoration-thickness:2px}
+.alumnix .formatted-answer blockquote{margin:1.25em 0;padding:.7em 1.1em;border-left:3px solid #93ad83;background:#eef3e8;border-radius:0 6px 6px 0;color:#50634f}
+.alumnix .formatted-answer blockquote>:last-child{margin-bottom:0}
+.alumnix .formatted-answer hr{border:0;border-top:1px solid var(--border);margin:1.8em 0}
+.alumnix .formatted-answer code{font-family:Consolas,'Courier New',monospace;font-size:.88em;background:#e8eee3;color:#234c3c;border-radius:4px;padding:.15em .35em}
+.alumnix .formatted-answer pre{max-width:100%;overflow:auto;white-space:pre;background:#eaf0e6;border:1px solid #d4e0cd;border-radius:8px;padding:18px 20px;margin:1.25em 0;line-height:1.65;tab-size:2}
+.alumnix .formatted-answer pre code{padding:0;border-radius:0;background:none;overflow-wrap:normal}
+.alumnix .answer-table{max-width:100%;overflow:auto;margin:1.25em 0;border:1px solid #cfdcce;border-radius:8px;background:#fff;overscroll-behavior-x:contain}
+.alumnix .answer-table:focus-visible{outline:2px solid #28634e;outline-offset:4px}
+.alumnix .answer-table table{width:100%;border-collapse:collapse;line-height:1.5;font-size:.94em}
+.alumnix .answer-table th,.alumnix .answer-table td{padding:12px 15px;text-align:left;vertical-align:top;min-width:120px;border:0;border-bottom:1px solid #dee7d9;overflow-wrap:normal;white-space:normal}
+.alumnix .answer-table th{background:#e8efdf;color:#284d3d;font-weight:600;text-transform:none;letter-spacing:0}
+.alumnix .answer-table tr:last-child td{border-bottom:0}
+.alumnix .answer-table tbody tr:nth-child(even){background:#f8faf5}
+.alumnix .answer-table .align-right{text-align:right}
+.alumnix .answer-table .align-center{text-align:center}
+.alumnix .answer-table .align-left{text-align:left}
+.alumnix .formatted-answer .answer-plain{white-space:pre-wrap}
+@media(max-width:640px){.alumnix .formatted-answer pre{padding:14px}.alumnix .answer-table th,.alumnix .answer-table td{padding:10px 12px}.alumnix .formatted-answer h2{font-size:1.4em}}

@@ -76,9 +76,12 @@ test('end-to-end access controls, isolation, quotas and retained counters',async
       assert.equal((await site.request('/api/me',{cookie:a})).status,401);
       assert.equal((await site.request('/api/jobs/'+jobId,{cookie:a})).status,401);
     });
-    await t.test('security headers and text-only rendering are active',async()=>{
+    await t.test('security headers and the isolated answer renderer are active',async()=>{
       const r=await site.request('/');assert.match(r.headers.get('content-security-policy'),/default-src 'none'/);assert.equal(r.headers.get('cache-control'),'no-store');
       assert.doesNotMatch(readFileSync(new URL('../public/app.js',import.meta.url),'utf8'),/innerHTML|localStorage/);
+      for(const path of ['/markdown.js','/vendor/markdown-it-15.0.2.mjs']) {
+        const asset=await site.request(path);assert.equal(asset.status,200);assert.match(asset.headers.get('content-type'),/javascript/);
+      }
     });
   }finally{await site.app.close();rmSync(dir,{recursive:true,force:true});}
 });

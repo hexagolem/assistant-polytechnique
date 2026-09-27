@@ -127,7 +127,7 @@ Créer un nouveau code pour la même adresse invalide les anciens codes et sessi
 | Dust | Les questions et réponses y sont conservées selon les réglages et droits de votre workspace ; les administrateurs autorisés peuvent y avoir accès |
 | Sauvegardes Render | Les snapshots du disque peuvent conserver des données plus longtemps que la base active ; voir les règles Render |
 
-Les réponses sont rendues **en texte**, sans HTML, image externe ou téléchargement automatique. Les citations et liens fournis dans le texte par l’agent restent du texte ; les citations interactives propres à Dust ne sont pas reconstruites. Configurez l’agent pour écrire des références vérifiables, par exemple `Source : annuaire, uid=…, observation=…`.
+Les réponses sont affichées avec leur **mise en forme Markdown** : gras, italique, titres, listes, tableaux, citations et blocs de code. Les tableaux et blocs de code larges défilent dans leur propre zone sur téléphone. Les liens HTTP, HTTPS et mailto sont cliquables et s’ouvrent dans un nouvel onglet. Le HTML fourni par l’agent reste du texte, les images des réponses ne sont pas chargées et les liens utilisant d’autres protocoles sont inactifs. Les citations interactives propres à Dust ne sont pas reconstruites : l’agent doit fournir des références textuelles ou des liens Markdown vérifiables. Aucun changement du prompt Dust n’est nécessaire si les réponses contiennent déjà du Markdown.
 
 Ne mettez pas de fichiers de données dans ce dépôt. L’application ne propose aucune route de téléchargement du `.db` ou des CSV. Cela n’empêche pas l’agent de restituer les informations auxquelles vous lui donnez accès. Aucun filtre par mots-clés n’est présenté comme une garantie contre les injections de prompt.
 
@@ -144,7 +144,7 @@ Le code a été vérifié localement avec `npm test`. Le fichier `VERIFICATION.m
 
 ## Développement local (facultatif)
 
-Node 24 est nécessaire. Le projet ne dépend d’aucun paquet npm tiers ; il utilise notamment SQLite fourni avec Node.
+Node 24 est nécessaire. Le serveur ne dépend d’aucun paquet npm tiers ; il utilise notamment SQLite fourni avec Node. Le navigateur utilise une copie locale de markdown-it 15.0.2, incluse avec sa licence dans `public/vendor` ; aucun CDN ni installation supplémentaire n’est nécessaire.
 
 Créez un fichier `.env` **local et ignoré par Git** avec `LOCAL_DEVELOPMENT=true`, `PUBLIC_ORIGIN=http://localhost:3000`, `DATA_DIR=./local-data`, un `ADMIN_SECRET` aléatoire, puis les valeurs Dust si vous voulez appeler votre véritable agent. Lancez `node --env-file=.env server.mjs`. Gardez ce mode sur votre ordinateur, sans tunnel public.
 
