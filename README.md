@@ -16,6 +16,12 @@ AlumniX propose un point d’entrée commun : **vous exprimez ce que vous cherch
 - **Explorer des parcours** pour découvrir les trajectoires d’autres polytechniciens et nourrir ses choix d’orientation.
 - **Retrouver une information précise**, comme un classement ou un élément de parcours, sans avoir à deviner sur quelle plateforme chercher.
 
+## **Comment accéder à AlumniX et l’utiliser ?**
+
+1. Rendez-vous sur [le site AlumniX](https://assistant-polytechnique.onrender.com/).
+2. Saisissez uniquement le **code d’accès indiqué dans la courte description du projet sur Google Forms** pour accéder au chatbot.
+3. Posez votre question au chatbot. Vous pouvez ensuite préciser votre recherche ou poser une question complémentaire dans la même conversation.
+
 ## Quelques exemples de questions
 
 > Trouve les élèves s’étant désistés pour le corps des Mines.
