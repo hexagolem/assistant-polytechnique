@@ -79,7 +79,7 @@ test('end-to-end access controls, isolation, quotas and retained counters',async
     await t.test('security headers and the isolated answer renderer are active',async()=>{
       const r=await site.request('/');assert.match(r.headers.get('content-security-policy'),/default-src 'none'/);assert.equal(r.headers.get('cache-control'),'no-store');
       assert.doesNotMatch(readFileSync(new URL('../public/app.js',import.meta.url),'utf8'),/innerHTML|localStorage/);
-      for(const path of ['/markdown.js','/vendor/markdown-it-15.0.2.mjs']) {
+      for(const path of ['/api.js','/markdown.js','/vendor/markdown-it-15.0.2.mjs']) {
         const asset=await site.request(path);assert.equal(asset.status,200);assert.match(asset.headers.get('content-type'),/javascript/);
       }
     });
