@@ -21,10 +21,6 @@ services:
         generateValue: true
       - key: DATA_DIR
         value: /var/data
-      - key: DAILY_LIMIT
-        value: "20"
-      - key: GLOBAL_DAILY_LIMIT
-        value: "200"
       - key: MAX_ANSWER_CHARS
         value: "6000"
       - key: DUST_ORIGIN
