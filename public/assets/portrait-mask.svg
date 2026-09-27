@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024">
+ <defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="white"/><stop offset=".80" stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient></defs>
+ <path fill="url(#fade)" d="M0 811 Q25 748 111 699 L105 654 Q88 617 105 581 L99 542 L112 480 Q109 395 151 371 Q240 301 331 371 Q355 392 373 420 Q367 351 406 306 Q441 264 500 267 Q594 268 645 327 Q670 354 674 403 Q657 317 707 274 Q749 223 825 207 Q898 180 958 197 Q1008 206 1020 274 Q1067 221 1133 195 Q1203 165 1288 172 Q1364 171 1415 233 Q1459 282 1469 344 Q1476 382 1460 421 L1469 470 Q1447 516 1446 558 L1439 608 Q1461 654 1536 717 L1536 1024 L0 1024Z"/>
+</svg>
