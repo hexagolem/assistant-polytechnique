@@ -99,7 +99,11 @@ test('end-to-end access controls, isolation, unlimited daily questions and retai
     });
     await t.test('security headers and the isolated answer renderer are active',async()=>{
       const r=await site.request('/');assert.match(r.headers.get('content-security-policy'),/default-src 'none'/);assert.equal(r.headers.get('cache-control'),'no-store');
-      assert.doesNotMatch(readFileSync(new URL('../public/app.js',import.meta.url),'utf8'),/innerHTML|localStorage/);
+      assert.match(r.body,/id="runner-game"/);assert.match(r.body,/id="runner-canvas"/);
+      assert.doesNotMatch(r.body,/Mon espace|Cette réponse t.a aidé|id="logout"|class="account/);
+      const appSource=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
+      assert.doesNotMatch(appSource,/innerHTML|localStorage|\/api\/feedback/);
+      assert.match(readFileSync(new URL('../public/experience.js',import.meta.url),'utf8'),/jumpRunner|ArrowUp/);
       for(const path of ['/api.js','/markdown.js','/vendor/markdown-it-15.0.2.mjs']) {
         const asset=await site.request(path);assert.equal(asset.status,200);assert.match(asset.headers.get('content-type'),/javascript/);
       }
