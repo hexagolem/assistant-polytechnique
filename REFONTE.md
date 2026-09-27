@@ -14,13 +14,13 @@ Base : sauvegarde du dépôt `hexagolem/assistant-polytechnique`, commit `f74a97
 
 ## Périmètre
 
-`public/index.html` et `public/alumnix.css` présentent la connexion et le chat. `experience.js` observe les états visuels existants et ajuste le champ de saisie ; il n’émet aucune requête réseau. Dans `app.js`, seuls les noms affichés « Toi » et « AlumniX » changent.
+`public/index.html` et `public/alumnix.css` présentent la connexion et le chat. `experience.js` observe les états visuels existants et ajuste le champ de saisie ; il n’émet aucune requête réseau. Dans `app.js`, les noms affichés « Toi » et « AlumniX » changent et les réponses passent par le lecteur Markdown local `markdown.js`. Les requêtes, les messages transmis à Dust et les états de conversation restent inchangés.
 
 `server.mjs` ajoute uniquement une liste explicite de fichiers visuels et autorise les images de la même origine. Les scripts, styles, images et polices restent locaux. Les routes API, l’authentification, les quotas, le stockage, les conversations Dust et la configuration de déploiement sont inchangés. Les fichiers d’administration sont inchangés.
 
 ## Vérifications
 
-- Les 29 tests existants passent.
+- Les 36 tests passent, dont les 29 contrôles existants et 7 tests du rendu Markdown (mise en forme, liens, tableaux, code littéral et contenus malveillants).
 - Syntaxe JavaScript vérifiée.
 - Polices, images et styles servis avec le type approprié ; `.env`, `server.mjs` et la base SQLite restent inaccessibles depuis le navigateur.
 - Parcours testé avec le serveur réel et un adaptateur Dust de démonstration local séparé : connexion, suggestion, envoi, attente, réponse, retour Oui/Non, nouvelle conversation, erreur et déconnexion pendant une recherche.
