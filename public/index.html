@@ -23,7 +23,7 @@
       <p class="access-note">Un stage, une trajectoire, un classement. Une question suffit pour commencer.</p>
     </section>
     <section id="chat-view" class="workspace" hidden aria-label="Conversation avec AlumniX">
-      <div class="workspace-bar"><button id="new-chat" class="new-chat" type="button"><span aria-hidden="true">＋</span> Nouvelle conversation</button><details class="account"><summary>Mon espace <span aria-hidden="true">⌄</span></summary><div class="account-popover"><p id="user-label"></p><p id="quota" class="quota"></p><button id="logout" class="text-button" type="button">Se déconnecter</button></div></details></div>
+      <div class="workspace-bar"><button id="new-chat" class="new-chat" type="button"><span aria-hidden="true">＋</span> Nouvelle conversation</button></div>
       <div class="chat-main">
         <p id="not-ready" class="notice" hidden>L’assistant n’est pas encore connecté. L’organisateur doit terminer sa configuration.</p>
         <div id="messages" class="messages" role="log" aria-label="Conversation" aria-live="polite">
@@ -32,7 +32,7 @@
             <figure class="generations-art"><img class="portraits" src="/assets/generations.webp" alt="Henri Poincaré, Valéry Giscard d’Estaing, Bernard Arnault et Arthur Mensch, quatre générations de polytechniciens" width="1536" height="1024"></figure>
           </div></div>
         </div>
-        <div id="waiting-visual" class="waiting-visual" hidden><canvas id="waiting-orb" aria-hidden="true" width="260" height="260"></canvas><p class="network-caption" role="status" aria-live="polite">Ton réseau s’active.</p></div>
+        <div id="waiting-visual" class="waiting-visual" hidden><canvas id="waiting-orb" aria-hidden="true" width="260" height="260"></canvas><p class="network-caption" role="status" aria-live="polite">Ton réseau s’active.</p><div id="runner-game" class="runner-game" role="application" aria-label="Mini-jeu de course. Appuie sur la barre d’espace ou touche le jeu pour sauter." tabindex="0"><canvas id="runner-canvas" width="430" height="96" aria-hidden="true"></canvas><p>Espace ou touche l’écran pour sauter</p></div></div>
         <div class="composer-wrap"><p id="chat-status" class="status" role="status"></p><form id="chat-form" class="composer"><label class="sr-only" for="question">Ta question</label><textarea id="question" rows="2" maxlength="2000" required placeholder="Je cherche un stage en finance…"></textarea><div class="composer-bottom"><span class="composer-hint">Pose ta question à AlumniX.</span><button class="primary" id="send" type="submit" aria-label="Envoyer la question"><span aria-hidden="true">↑</span></button></div></form><div class="suggestions"><button type="button" data-prompt="Quels anciens travaillent en finance et pourraient m’aider à trouver un stage ?">Trouver un stage <span aria-hidden="true">↗</span></button><button type="button" data-prompt="Quels anciens ont un parcours dans la recherche en intelligence artificielle ?">Explorer un parcours <span aria-hidden="true">↗</span></button><button type="button" data-prompt="Je cherche un classement d’entrée pour l’année ">Consulter un classement <span aria-hidden="true">↗</span></button></div><p class="fine response-note">Vérifie les sources des réponses. <span>Tes échanges sont traités par Dust ; les accès et volumes d’usage sont journalisés.</span></p></div>
       </div>
     </section>
