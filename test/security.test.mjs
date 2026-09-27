@@ -17,7 +17,7 @@ function fakeDust(){
 async function start(config,dust){const app=createApplication(config,dust);await new Promise(r=>app.server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+app.server.address().port;return {app,async request(path,{cookie='',data,originHeader=origin}={}){const response=await fetch(base+path,{method:data===undefined?'GET':'POST',headers:{...(cookie?{Cookie:cookie}:{}),...(data===undefined?{}:{'Content-Type':'application/json',Origin:originHeader})},body:data===undefined?undefined:JSON.stringify(data)});const text=await response.text();return {status:response.status,headers:response.headers,body:response.headers.get('content-type')?.includes('json')?JSON.parse(text):text,cookie:response.headers.get('set-cookie')?.split(';')[0]};}};}
 async function done(site,job,cookie){for(let n=0;n<30;n++){const r=await site.request('/api/jobs/'+job,{cookie});if(r.body.state!=='pending')return r;await new Promise(r=>setTimeout(r,3));}assert.fail('job did not finish');}
 
-test('end-to-end access controls, isolation, quotas and retained counters',async t=>{
+test('end-to-end access controls, isolation, unlimited daily questions and retained counters',async t=>{
   const dir=mkdtempSync(join(tmpdir(),'poly-test-'));const dust=fakeDust();let site=await start(cfg(dir),dust);
   let admin,a,b,userId,threadId,jobId;
   try{
@@ -32,7 +32,8 @@ test('end-to-end access controls, isolation, quotas and retained counters',async
     });
     await t.test('individual invitations work and are stored hashed',async()=>{
       const inviteA=await site.request('/api/admin/invite',{cookie:admin,data:{email:'alice@example.test',days:7,dailyLimit:2}});
-      const inviteB=await site.request('/api/admin/invite',{cookie:admin,data:{email:'bob@example.test',days:7,dailyLimit:5}});
+      const inviteB=await site.request('/api/admin/invite',{cookie:admin,data:{email:'bob@example.test',days:7}});
+      assert.equal(inviteB.status,200);
       assert.equal(inviteA.status,200);assert.equal(inviteA.body.code.length,43);
       assert.notEqual(site.app.db.prepare('SELECT code_hash FROM testers WHERE email=?').get('alice@example.test').code_hash,inviteA.body.code);
       assert.equal((await site.request('/api/login',{data:{email:'bob@example.test',code:inviteA.body.code}})).status,401);
@@ -60,16 +61,26 @@ test('end-to-end access controls, isolation, quotas and retained counters',async
     });
     await t.test('follow-up uses the same owner conversation and is counted',async()=>{
       const r=await site.request('/api/chat',{cookie:a,data:{message:'suite',threadId}});assert.equal(r.status,202);assert.equal((await done(site,r.body.jobId,a)).body.answer,'Réponse suivante.');
-      assert.equal(dust.conversations.size,1);assert.equal((await site.request('/api/chat',{cookie:a,data:{message:'quota'}})).status,429);
+      assert.equal(dust.conversations.size,1);assert.equal(r.body.limit,null);
     });
-    await t.test('quota survives restart; invitation renewal does not reset usage',async()=>{
+    await t.test('old codes exceed former personal and global caps after restart; renewal keeps usage',async()=>{
+      // Simulate a deployed database with an old limited code and over 5,000 daily jobs.
+      site.app.db.prepare('UPDATE testers SET daily_limit=1 WHERE id=?').run(userId);
+      site.app.db.prepare(`WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM n WHERE x<5001)
+        INSERT INTO jobs(id,user_id,thread_id,state,created) SELECT 'historic-'||x,?,?,'done',? FROM n`).run(userId,threadId,Date.now());
       await site.app.close();site=await start(cfg(dir),dust);
-      assert.equal((await site.request('/api/chat',{cookie:a,data:{message:'quota after restart'}})).status,429);
-      const invite=await site.request('/api/admin/invite',{cookie:admin,data:{email:'alice@example.test',days:7,dailyLimit:2}});
+      const me=await site.request('/api/me',{cookie:a});assert.equal(me.body.limit,null);assert.equal(me.body.used,5003);
+      const state=(await site.request('/api/admin/state',{cookie:admin})).body;
+      assert.equal(state.globalDailyLimit,null);assert.equal(state.users.find(u=>u.id===userId).daily_limit,null);
+      const next=await site.request('/api/chat',{cookie:a,data:{message:'after restart'}});assert.equal(next.status,202);
+      assert.equal((await done(site,next.body.jobId,a)).body.state,'done');
+      const invite=await site.request('/api/admin/invite',{cookie:admin,data:{email:'alice@example.test',days:7}});
+      assert.equal(invite.status,200);
       assert.equal((await site.request('/api/me',{cookie:a})).status,401);
       a=(await site.request('/api/login',{data:{email:'alice@example.test',code:invite.body.code}})).cookie;
-      assert.equal((await site.request('/api/me',{cookie:a})).body.used,2);
-      assert.equal((await site.request('/api/chat',{cookie:a,data:{message:'quota after renewal'}})).status,429);
+      assert.equal((await site.request('/api/me',{cookie:a})).body.used,5004);
+      const renewed=await site.request('/api/chat',{cookie:a,data:{message:'after renewal'}});assert.equal(renewed.status,202);
+      assert.equal((await done(site,renewed.body.jobId,a)).body.state,'done');
     });
     await t.test('revocation immediately invalidates existing sessions',async()=>{
       assert.equal((await site.request('/api/admin/revoke',{cookie:admin,data:{id:userId}})).status,200);

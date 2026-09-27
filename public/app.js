@@ -2,7 +2,7 @@ import {renderAnswer} from './markdown.js';
 import {api,waitForJob} from './api.js';
 const $=id=>document.getElementById(id);
 let threadId=null, busy=false, generation=0;
-function quota(user){$('quota').textContent=`${user.used} / ${user.limit} questions aujourd’hui`;}
+function quota(user){$('quota').textContent=`${user.used} questions aujourd’hui · sans limite quotidienne`;}
 function loginView(){generation++;$('chat-view').hidden=true;$('login-view').hidden=false;$('login-footer').hidden=false;threadId=null;}
 async function enter(){const user=await api('/api/me');$('user-email').textContent=user.email;quota(user);$('login-view').hidden=true;$('login-footer').hidden=true;$('chat-view').hidden=false;$('not-ready').hidden=user.ready;$('send').disabled=!user.ready;$('question').disabled=!user.ready;}
 $('login-form').addEventListener('submit',async e=>{e.preventDefault();$('login-error').textContent='';$('login-button').disabled=true;try{await api('/api/login',{email:$('email').value,code:$('code').value});$('code').value='';clearChat();await enter();}catch(err){$('login-error').textContent=err.message;}finally{$('login-button').disabled=false;}});

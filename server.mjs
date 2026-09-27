@@ -49,8 +49,6 @@ export function readConfig(env = process.env) {
   return {
     local, origin, adminSecret: env.ADMIN_SECRET, dataDir, dustOrigin,
     apiKey, workspaceId, agentId,
-    defaultDailyLimit: numberSetting(env.DAILY_LIMIT, 20, 200),
-    globalDailyLimit: numberSetting(env.GLOBAL_DAILY_LIMIT, 200, 5000),
     maxAnswerChars: numberSetting(env.MAX_ANSWER_CHARS, 6000, 20000),
     pollMs: 1800, jobTimeoutMs: 240000,
     ready: Boolean(apiKey && workspaceId && agentId)
@@ -261,7 +259,7 @@ export function createApplication(config, dustOverride) {
         json(res,200,{ok:true}); return;
       }
       if (req.method==='GET' && path==='/api/me') {
-        const s=requireSession(req,'tester'); json(res,200,{email:s.user.email,used:usedToday(s.user.id),limit:s.user.daily_limit,ready:config.ready}); return;
+        const s=requireSession(req,'tester'); json(res,200,{email:s.user.email,used:usedToday(s.user.id),limit:null,ready:config.ready}); return;
       }
       if (req.method==='POST' && path==='/api/chat') {
         const s=requireSession(req,'tester'); const data=await body(req); only(data,['message','threadId']);
@@ -269,8 +267,6 @@ export function createApplication(config, dustOverride) {
         if(typeof data.message!=='string' || !data.message.trim() || data.message.length>2000) fail(400,'Écris une question de 1 à 2 000 caractères.');
         if(db.prepare("SELECT id FROM jobs WHERE user_id=? AND state='pending'").get(s.user.id)) fail(409,'Une recherche est déjà en cours.');
         rate('chat:'+s.user.id,6,60000);
-        if(usedToday(s.user.id)>=s.user.daily_limit) fail(429,'Ton quota du jour est atteint. Il se renouvelle à 00:00 UTC.');
-        if(db.prepare('SELECT count(*) AS n FROM jobs WHERE created>=?').get(dayStart()).n>=config.globalDailyLimit) fail(429,'Le quota de la session de test est atteint pour aujourd’hui.');
         let thread;
         if(data.threadId!==null && data.threadId!==undefined) {
           if(typeof data.threadId!=='string') fail(400,'Conversation invalide.');
@@ -288,7 +284,7 @@ export function createApplication(config, dustOverride) {
           db.exec('COMMIT');
         } catch(error) {db.exec('ROLLBACK');throw error;}
         audit(s.user.id,'question',jobId);
-        json(res,202,{jobId,threadId:thread.id,used:usedToday(s.user.id),limit:s.user.daily_limit});
+        json(res,202,{jobId,threadId:thread.id,used:usedToday(s.user.id),limit:null});
         void runJob(jobId,s.user.id,thread.id,data.message.trim()); return;
       }
       const jobMatch=path.match(/^\/api\/jobs\/([a-f0-9-]{36})$/);
@@ -308,11 +304,11 @@ export function createApplication(config, dustOverride) {
       if(path.startsWith('/api/admin/')) {
         requireSession(req,'admin');
         if(req.method==='GET' && path==='/api/admin/state') {
-          const users=db.prepare('SELECT id,email,expires,enabled,daily_limit FROM testers ORDER BY created DESC').all().map(u=>({...u,used:usedToday(u.id)}));
+          const users=db.prepare('SELECT id,email,expires,enabled FROM testers ORDER BY created DESC').all().map(u=>({...u,daily_limit:null,used:usedToday(u.id)}));
           const stats=db.prepare("SELECT count(*) AS questions,sum(state='done') AS completed,sum(feedback=1) AS positive,sum(feedback=-1) AS negative FROM jobs WHERE created>=?").get(dayStart());
           const events=db.prepare('SELECT a.created,a.event,a.code,t.email FROM audit a LEFT JOIN testers t ON t.id=a.user_id ORDER BY a.id DESC LIMIT 100').all()
             .map(e=>({...e,...(e.code?.endsWith('agent_inaccessible')?{detail:dustDiagnostic(e.code).message}:{})}));
-          json(res,200,{users,stats,events,ready:config.ready,defaultDailyLimit:config.defaultDailyLimit,globalDailyLimit:config.globalDailyLimit}); return;
+          json(res,200,{users,stats,events,ready:config.ready,defaultDailyLimit:null,globalDailyLimit:null}); return;
         }
         if(req.method==='POST' && path==='/api/admin/dust/check') {
           const data=await body(req); only(data,[]);
@@ -332,12 +328,13 @@ export function createApplication(config, dustOverride) {
         }
         if(req.method==='POST' && path==='/api/admin/invite') {
           const data=await body(req); only(data,['email','days','dailyLimit']); const email=emailOf(data.email);
-          const days=Number(data.days); const limit=Number(data.dailyLimit);
-          if(!Number.isInteger(days)||days<1||days>30||!Number.isInteger(limit)||limit<1||limit>200) fail(400,'Durée ou quota invalide.');
+          // Accept the legacy dailyLimit field from already-open admin pages, but ignore it.
+          const days=Number(data.days);
+          if(!Number.isInteger(days)||days<1||days>30) fail(400,'Durée invalide.');
           const code=random(); const previous=db.prepare('SELECT id FROM testers WHERE email=?').get(email);
           const id=previous?.id || randomUUID(); const expires=now()+days*DAY;
           db.prepare(`INSERT INTO testers VALUES(?,?,?,?,1,?,?) ON CONFLICT(email) DO UPDATE SET
-            code_hash=excluded.code_hash,expires=excluded.expires,enabled=1,daily_limit=excluded.daily_limit`).run(id,email,hash(code),expires,limit,now());
+            code_hash=excluded.code_hash,expires=excluded.expires,enabled=1,daily_limit=excluded.daily_limit`).run(id,email,hash(code),expires,0,now());
           db.prepare('DELETE FROM sessions WHERE user_id=?').run(id);
           audit(id,'access_created'); json(res,200,{email,code,expires,url:config.origin}); return;
         }
