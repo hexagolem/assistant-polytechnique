@@ -13,10 +13,7 @@ const random = () => randomBytes(32).toString('base64url');
 const now = () => Date.now();
 const DAY = 86_400_000;
 const fail = (status, message) => { throw Object.assign(new Error(message), {status}); };
-const emailOf = value => {
-  if (typeof value !== 'string' || value.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) fail(400, 'Adresse e-mail invalide.');
-  return value.trim().toLowerCase();
-};
+const accessLabel = user => 'Accès ' + user.id.slice(0,8);
 function numberSetting(value, fallback, max) {
   const n = value === undefined ? fallback : Number(value);
   if (!Number.isInteger(n) || n < 1 || n > max) throw new Error('Quota invalide.');
@@ -74,6 +71,7 @@ export function createApplication(config, dustOverride) {
       state TEXT NOT NULL, answer TEXT, error_code TEXT, created INTEGER NOT NULL,
       feedback INTEGER, response_chars INTEGER NOT NULL DEFAULT 0);
     CREATE INDEX IF NOT EXISTS jobs_user_date ON jobs(user_id, created);
+    CREATE INDEX IF NOT EXISTS testers_code_hash ON testers(code_hash);
     CREATE TABLE IF NOT EXISTS rate_limits (key TEXT PRIMARY KEY, used INTEGER NOT NULL, expires INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS audit (
       id INTEGER PRIMARY KEY, user_id TEXT, event TEXT NOT NULL, created INTEGER NOT NULL,
@@ -236,14 +234,16 @@ export function createApplication(config, dustOverride) {
       }
       if (req.method==='GET' && path==='/robots.txt') {res.writeHead(200,{'Content-Type':'text/plain'});res.end('User-agent: *\nDisallow: /\n');return;}
       if (req.method==='POST' && path==='/api/login') {
-        const data=await body(req); only(data,['email','code']);
-        const email=emailOf(data.email);
-        rate('login:global',200,15*60000); rate('login:'+hash(email),8,15*60000);
-        const user=db.prepare('SELECT * FROM testers WHERE email=? AND enabled=1 AND expires>?').get(email,now());
-        const candidate=typeof data.code==='string'?data.code.trim():'';
-        const valid=same(hash(candidate),user?.code_hash || hash('invalid'));
-        if(!user || !valid || candidate.length>100) fail(401,'Adresse ou code incorrect, expiré ou révoqué.');
-        db.prepare('DELETE FROM rate_limits WHERE key=?').run('login:'+hash(email));
+        const data=await body(req); only(data,['password']);
+        // Do not trust caller-supplied forwarding headers for the attempt limiter.
+        const attemptKey='login:peer:'+hash(req.socket.remoteAddress || 'unknown');
+        rate('login:global',200,15*60000); rate(attemptKey,8,15*60000);
+        const candidate=typeof data.password==='string'?data.password.trim():'';
+        if(!candidate || candidate.length>100) fail(401,'Mot de passe incorrect, expiré ou révoqué.');
+        const users=db.prepare('SELECT * FROM testers WHERE code_hash=? AND enabled=1 AND expires>? LIMIT 2').all(hash(candidate),now());
+        if(users.length!==1) fail(401,'Mot de passe incorrect, expiré ou révoqué.');
+        const user=users[0];
+        db.prepare('DELETE FROM rate_limits WHERE key=?').run(attemptKey);
         issueSession(res,'tester',user); audit(user.id,'login'); json(res,200,{ok:true}); return;
       }
       if (req.method==='POST' && path==='/api/admin/login') {
@@ -259,7 +259,7 @@ export function createApplication(config, dustOverride) {
         json(res,200,{ok:true}); return;
       }
       if (req.method==='GET' && path==='/api/me') {
-        const s=requireSession(req,'tester'); json(res,200,{email:s.user.email,used:usedToday(s.user.id),limit:null,ready:config.ready}); return;
+        const s=requireSession(req,'tester'); json(res,200,{label:accessLabel(s.user),used:usedToday(s.user.id),limit:null,ready:config.ready}); return;
       }
       if (req.method==='POST' && path==='/api/chat') {
         const s=requireSession(req,'tester'); const data=await body(req); only(data,['message','threadId']);
@@ -304,10 +304,10 @@ export function createApplication(config, dustOverride) {
       if(path.startsWith('/api/admin/')) {
         requireSession(req,'admin');
         if(req.method==='GET' && path==='/api/admin/state') {
-          const users=db.prepare('SELECT id,email,expires,enabled FROM testers ORDER BY created DESC').all().map(u=>({...u,daily_limit:null,used:usedToday(u.id)}));
+          const users=db.prepare('SELECT id,expires,enabled FROM testers ORDER BY created DESC').all().map(u=>({...u,label:accessLabel(u),daily_limit:null,used:usedToday(u.id)}));
           const stats=db.prepare("SELECT count(*) AS questions,sum(state='done') AS completed,sum(feedback=1) AS positive,sum(feedback=-1) AS negative FROM jobs WHERE created>=?").get(dayStart());
-          const events=db.prepare('SELECT a.created,a.event,a.code,t.email FROM audit a LEFT JOIN testers t ON t.id=a.user_id ORDER BY a.id DESC LIMIT 100').all()
-            .map(e=>({...e,...(e.code?.endsWith('agent_inaccessible')?{detail:dustDiagnostic(e.code).message}:{})}));
+          const events=db.prepare('SELECT a.created,a.event,a.code,t.id FROM audit a LEFT JOIN testers t ON t.id=a.user_id ORDER BY a.id DESC LIMIT 100').all()
+            .map(({id,...e})=>({...e,label:id?accessLabel({id}):null,...(e.code?.endsWith('agent_inaccessible')?{detail:dustDiagnostic(e.code).message}:{})}));
           json(res,200,{users,stats,events,ready:config.ready,defaultDailyLimit:null,globalDailyLimit:null}); return;
         }
         if(req.method==='POST' && path==='/api/admin/dust/check') {
@@ -327,16 +327,15 @@ export function createApplication(config, dustOverride) {
           return;
         }
         if(req.method==='POST' && path==='/api/admin/invite') {
-          const data=await body(req); only(data,['email','days','dailyLimit']); const email=emailOf(data.email);
-          // Accept the legacy dailyLimit field from already-open admin pages, but ignore it.
-          const days=Number(data.days);
+          const data=await body(req); only(data,['days']);
+          const days=Number(data.days ?? 7);
           if(!Number.isInteger(days)||days<1||days>30) fail(400,'Durée invalide.');
-          const code=random(); const previous=db.prepare('SELECT id FROM testers WHERE email=?').get(email);
-          const id=previous?.id || randomUUID(); const expires=now()+days*DAY;
-          db.prepare(`INSERT INTO testers VALUES(?,?,?,?,1,?,?) ON CONFLICT(email) DO UPDATE SET
-            code_hash=excluded.code_hash,expires=excluded.expires,enabled=1,daily_limit=excluded.daily_limit`).run(id,email,hash(code),expires,0,now());
-          db.prepare('DELETE FROM sessions WHERE user_id=?').run(id);
-          audit(id,'access_created'); json(res,200,{email,code,expires,url:config.origin}); return;
+          const password=random(); const id=randomUUID(); const expires=now()+days*DAY;
+          // Preserve the old schema and existing credentials. New accesses use an opaque
+          // identifier in the legacy email column; no email is collected or used to log in.
+          db.prepare('INSERT INTO testers (id,email,code_hash,expires,enabled,daily_limit,created) VALUES(?,?,?,?,1,0,?)')
+            .run(id,id,hash(password),expires,now());
+          audit(id,'access_created'); json(res,200,{id,label:accessLabel({id}),password,expires,url:config.origin}); return;
         }
         if(req.method==='POST' && path==='/api/admin/revoke') {
           const data=await body(req); only(data,['id']); if(typeof data.id!=='string') fail(400,'Accès invalide.');
