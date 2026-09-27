@@ -41,10 +41,38 @@ async function badRequestCode(response, stage) {
   const prefix = `dust_http_400_${stage}`;
   try {
     const data = await readJson(response, 16384);
+    // Public Dust API error types, including agent/model access failures.
     const allowedTypes = new Set([
-      'invalid_request_error', 'agent_configuration_not_found',
-      'invalid_agent_configuration', 'conversation_not_found',
-      'workspace_not_found', 'space_not_found', 'permission_error'
+      'action_api_error', 'action_failed', 'action_unknown_error',
+      'agent_configuration_not_found', 'agent_inaccessible', 'agent_message_error',
+      'app_auth_error', 'app_not_found', 'assistant_saving_error',
+      'chat_message_not_found', 'connector_credentials_error', 'connector_not_found_error',
+      'connector_oauth_target_mismatch', 'connector_provider_not_supported', 'connector_update_error',
+      'connector_update_unauthorized', 'content_too_large', 'conversation_access_restricted',
+      'conversation_not_found', 'credits_exhausted', 'data_source_auth_error',
+      'data_source_document_not_found', 'data_source_error', 'data_source_not_found',
+      'data_source_not_managed', 'data_source_quota_error', 'data_source_view_not_found',
+      'dataset_not_found', 'dust_app_secret_not_found', 'expired_oauth_token_error',
+      'feature_flag_already_exists', 'feature_flag_not_found', 'file_not_found',
+      'file_too_large', 'file_type_not_supported', 'global_agent_error',
+      'group_not_found', 'internal_server_error', 'invalid_agent_configuration',
+      'invalid_api_key_error', 'invalid_oauth_token_error', 'invalid_pagination_parameters',
+      'invalid_request_error', 'invalid_rows_request_error', 'invitation_already_sent_recently',
+      'invitation_not_found', 'key_not_found', 'malformed_authorization_header_error',
+      'membership_not_found', 'message_not_found', 'method_not_supported_error',
+      'missing_authorization_header_error', 'model_disabled', 'no_seat',
+      'not_authenticated', 'permission_error', 'personal_workspace_not_found',
+      'plan_limit_error', 'plan_message_limit_exceeded', 'plugin_execution_failed',
+      'plugin_not_found', 'provider_auth_error', 'provider_not_found',
+      'rate_limit_error', 'run_error', 'run_not_found',
+      'skill_not_found', 'space_already_exists', 'space_not_found',
+      'stripe_invalid_product_id_error', 'subscription_not_found', 'subscription_payment_failed',
+      'subscription_state_invalid', 'table_not_found', 'template_not_found',
+      'transcripts_configuration_already_exists', 'transcripts_configuration_default_not_allowed', 'transcripts_configuration_not_found',
+      'unexpected_action_response', 'unexpected_error_format', 'unexpected_network_error',
+      'unexpected_response_format', 'unprocessable_entity', 'user_cap_reached',
+      'user_not_found', 'workspace_auth_error', 'workspace_can_use_product_required_error',
+      'workspace_not_found', 'workspace_user_not_found'
     ]);
     const type = allowedTypes.has(data?.error?.type) ? data.error.type : 'unknown';
     const detail = typeof data?.error?.message === 'string' ? data.error.message : '';
