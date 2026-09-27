@@ -103,7 +103,9 @@ test('end-to-end access controls, isolation, unlimited daily questions and retai
       assert.doesNotMatch(r.body,/Mon espace|Cette réponse t.a aidé|id="logout"|class="account/);
       const appSource=readFileSync(new URL('../public/app.js',import.meta.url),'utf8');
       assert.doesNotMatch(appSource,/innerHTML|localStorage|\/api\/feedback/);
-      assert.match(readFileSync(new URL('../public/experience.js',import.meta.url),'utf8'),/jumpRunner|ArrowUp/);
+      const experienceSource=readFileSync(new URL('../public/experience.js',import.meta.url),'utf8');
+      assert.match(experienceSource,/if \(runnerDeadUntil\) resetRunner\(\)/);
+      assert.match(experienceSource,/document\.addEventListener\('keydown'[\s\S]*ArrowUp/);
       for(const path of ['/api.js','/markdown.js','/vendor/markdown-it-15.0.2.mjs']) {
         const asset=await site.request(path);assert.equal(asset.status,200);assert.match(asset.headers.get('content-type'),/javascript/);
       }
