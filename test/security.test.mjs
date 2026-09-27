@@ -4,7 +4,7 @@ import {mkdtempSync,rmSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createApplication,readConfig} from '../server.mjs';
-import {createDustClient,latestMessages} from '../dust.mjs';
+import {createDustClient,latestMessages,DustError} from '../dust.mjs';
 
 const origin='http://localhost:3000';
 const secret='fixture-only-admin-secret-not-for-production';
@@ -118,4 +118,58 @@ test('production refuses insecure configuration and local mode on Render',()=>{
   assert.throws(()=>readConfig({PUBLIC_ORIGIN:'http://example.com',ADMIN_SECRET:secret}),/HTTPS/);
   assert.throws(()=>readConfig({LOCAL_DEVELOPMENT:'true',ADMIN_SECRET:'short'}),/32/);
   assert.throws(()=>readConfig({LOCAL_DEVELOPMENT:'true',ADMIN_SECRET:secret,DUST_ORIGIN:'https://attacker.example'}),/DUST_ORIGIN/);
+});
+
+test('Dust diagnostics are admin-only, read-only and do not expose secrets',async()=>{
+  const dir=mkdtempSync(join(tmpdir(),'poly-diagnostic-'));
+  const dust=fakeDust(); let checks=0; let failure=null;
+  dust.checkAgent=async()=>{checks++;if(failure)throw failure;return {status:'active',instructions:'PRIVATE',apiKey:'PRIVATE'};};
+  const config=cfg(dir); const site=await start(config,dust);
+  try {
+    const path='/api/admin/dust/check';
+    assert.equal((await site.request(path,{data:{}})).status,401);
+    const admin=(await site.request('/api/admin/login',{data:{secret}})).cookie;
+    const invite=(await site.request('/api/admin/invite',{cookie:admin,data:{email:'diagnostic@example.test',days:1,dailyLimit:5}})).body;
+    const cookie=(await site.request('/api/login',{data:{email:invite.email,code:invite.code}})).cookie;
+    assert.equal((await site.request(path,{cookie,data:{}})).status,403);
+    assert.equal((await site.request(path,{cookie:admin,data:{},originHeader:'https://attacker.example'})).status,403);
+    assert.equal((await site.request(path,{cookie:admin,data:{agentId:'other'}})).status,400);
+    assert.equal(checks,0);
+    const success=await site.request(path,{cookie:admin,data:{}});
+    assert.equal(success.status,200);assert.equal(success.body.ok,true);
+    assert.doesNotMatch(JSON.stringify(success.body),/PRIVATE|instructions|apiKey/);
+    failure=new DustError('dust_http_400_agent_agent_inaccessible');
+    const denied=await site.request(path,{cookie:admin,data:{}});
+    assert.equal(denied.body.ok,false);assert.match(denied.body.message,/accès/);
+    assert.match(denied.body.steps.join(' '),/DUST_AGENT_ID/);
+    failure=new Error('PRIVATE raw exception');
+    const unexpected=await site.request(path,{cookie:admin,data:{}});
+    assert.equal(unexpected.body.code,'internal');assert.doesNotMatch(JSON.stringify(unexpected.body),/PRIVATE/);
+    config.ready=false;
+    const incomplete=await site.request(path,{cookie:admin,data:{}});
+    assert.equal(incomplete.body.code,'dust_not_configured');assert.equal(checks,3);
+    assert.equal(site.app.db.prepare('SELECT count(*) AS n FROM jobs').get().n,0);
+    assert.equal(dust.calls.length,0);
+    assert.equal((await site.request('/api/me',{cookie})).body.used,0);
+    for(let i=0;i<2;i++)await site.request(path,{cookie:admin,data:{}});
+    assert.equal((await site.request(path,{cookie:admin,data:{}})).status,429);
+  } finally {await site.app.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('agent_inaccessible gives testers a useful error and explains the admin audit',async()=>{
+  const dir=mkdtempSync(join(tmpdir(),'poly-access-error-'));const dust=fakeDust();let creates=0;
+  dust.create=async()=>{creates++;throw new DustError('dust_http_400_create_agent_inaccessible');};
+  const site=await start(cfg(dir),dust);
+  try {
+    const admin=(await site.request('/api/admin/login',{data:{secret}})).cookie;
+    const invite=(await site.request('/api/admin/invite',{cookie:admin,data:{email:'error@example.test',days:1,dailyLimit:5}})).body;
+    const cookie=(await site.request('/api/login',{data:{email:invite.email,code:invite.code}})).cookie;
+    const job=(await site.request('/api/chat',{cookie,data:{message:'test'}})).body;
+    const result=await done(site,job.jobId,cookie);
+    assert.equal(result.body.state,'error');assert.match(result.body.error,/rétablir son accès/);
+    assert.equal(creates,1);
+    const state=(await site.request('/api/admin/state',{cookie:admin})).body;
+    const event=state.events.find(e=>e.event==='error');
+    assert.equal(event.code,'dust_http_400_create_agent_inaccessible');assert.match(event.detail,/clé API/);
+  } finally {await site.app.close();rmSync(dir,{recursive:true,force:true});}
 });

@@ -4,7 +4,7 @@ import {resolve, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomBytes, randomUUID, createHash, timingSafeEqual} from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
-import {createDustClient, latestMessages, DustError} from './dust.mjs';
+import {createDustClient, latestMessages, DustError, dustDiagnostic} from './dust.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -38,19 +38,22 @@ export function readConfig(env = process.env) {
     const mounts = readFileSync('/proc/mounts', 'utf8');
     if (!mounts.split('\n').some(line => line.split(' ')[1] === '/var/data')) throw new Error('Aucun disque monté sur /var/data : démarrage refusé.');
   }
-  const dustOrigin = env.DUST_ORIGIN || 'https://dust.tt';
+  const dustOrigin = (env.DUST_ORIGIN || 'https://dust.tt').trim().replace(/\/$/, '');
+  const apiKey = (env.DUST_API_KEY || '').trim();
+  const workspaceId = (env.DUST_WORKSPACE_ID || '').trim();
+  const agentId = (env.DUST_AGENT_ID || '').trim();
   if (!['https://dust.tt','https://eu.dust.tt'].includes(dustOrigin)) throw new Error('DUST_ORIGIN doit être https://dust.tt ou https://eu.dust.tt.');
-  for (const key of ['DUST_WORKSPACE_ID','DUST_AGENT_ID']) {
-    if (env[key] && !/^[a-zA-Z0-9_-]{1,100}$/.test(env[key])) throw new Error(`${key} invalide.`);
+  for (const [key, value] of [['DUST_WORKSPACE_ID',workspaceId],['DUST_AGENT_ID',agentId]]) {
+    if (value && !/^[a-zA-Z0-9_-]{1,100}$/.test(value)) throw new Error(`${key} invalide : copie l’identifiant seul, pas une URL ni un nom.`);
   }
   return {
     local, origin, adminSecret: env.ADMIN_SECRET, dataDir, dustOrigin,
-    apiKey: env.DUST_API_KEY || '', workspaceId: env.DUST_WORKSPACE_ID || '', agentId: env.DUST_AGENT_ID || '',
+    apiKey, workspaceId, agentId,
     defaultDailyLimit: numberSetting(env.DAILY_LIMIT, 20, 200),
     globalDailyLimit: numberSetting(env.GLOBAL_DAILY_LIMIT, 200, 5000),
     maxAnswerChars: numberSetting(env.MAX_ANSWER_CHARS, 6000, 20000),
     pollMs: 1800, jobTimeoutMs: 240000,
-    ready: Boolean(env.DUST_API_KEY && env.DUST_WORKSPACE_ID && env.DUST_AGENT_ID)
+    ready: Boolean(apiKey && workspaceId && agentId)
   };
 }
 
@@ -149,7 +152,9 @@ export function createApplication(config, dustOverride) {
     } catch { fail(400,'Requête invalide.'); }
   }
   function only(data, keys) { if(Object.keys(data).some(k=>!keys.includes(k))) fail(400,'Paramètre non autorisé.'); }
-  const jobError = code => ({
+  const jobError = code => /agent_inaccessible$/.test(code)
+    ? 'L’agent est désactivé ou inaccessible dans Dust. L’organisateur doit rétablir son accès avant de réessayer.'
+    : ({
     revoked:'Cet accès a expiré ou a été retiré.',
     timeout:'La recherche a pris trop de temps. Réessaie avec une question plus précise.',
     restart:'Le service a redémarré pendant la recherche. Cette demande n’a pas été relancée.',
@@ -293,8 +298,25 @@ export function createApplication(config, dustOverride) {
         if(req.method==='GET' && path==='/api/admin/state') {
           const users=db.prepare('SELECT id,email,expires,enabled,daily_limit FROM testers ORDER BY created DESC').all().map(u=>({...u,used:usedToday(u.id)}));
           const stats=db.prepare("SELECT count(*) AS questions,sum(state='done') AS completed,sum(feedback=1) AS positive,sum(feedback=-1) AS negative FROM jobs WHERE created>=?").get(dayStart());
-          const events=db.prepare('SELECT a.created,a.event,a.code,t.email FROM audit a LEFT JOIN testers t ON t.id=a.user_id ORDER BY a.id DESC LIMIT 100').all();
+          const events=db.prepare('SELECT a.created,a.event,a.code,t.email FROM audit a LEFT JOIN testers t ON t.id=a.user_id ORDER BY a.id DESC LIMIT 100').all()
+            .map(e=>({...e,...(e.code?.endsWith('agent_inaccessible')?{detail:dustDiagnostic(e.code).message}:{})}));
           json(res,200,{users,stats,events,ready:config.ready,defaultDailyLimit:config.defaultDailyLimit,globalDailyLimit:config.globalDailyLimit}); return;
+        }
+        if(req.method==='POST' && path==='/api/admin/dust/check') {
+          const data=await body(req); only(data,[]);
+          rate('admin:dust:check',6,60000);
+          try {
+            if(!config.ready) throw new DustError('dust_not_configured');
+            const agent=await dust.checkAgent();
+            json(res,200,{ok:true,message:agent.status==='draft'
+              ? 'L’agent est accessible, mais encore en brouillon.'
+              : 'L’agent est actif et sa configuration est accessible avec cette clé.',
+              steps:['Cette vérification ne lance aucune génération. Teste maintenant une question pour vérifier aussi le modèle, les outils et les crédits.']});
+          } catch(error) {
+            const code=error instanceof DustError?error.code:'internal';
+            json(res,200,{ok:false,code,...dustDiagnostic(code)});
+          }
+          return;
         }
         if(req.method==='POST' && path==='/api/admin/invite') {
           const data=await body(req); only(data,['email','days','dailyLimit']); const email=emailOf(data.email);

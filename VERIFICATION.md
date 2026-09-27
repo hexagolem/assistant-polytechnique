@@ -4,7 +4,7 @@ Date : 27 septembre 2026.
 
 ## Résultats obtenus
 
-- `npm test` : **14 tests réussis, aucun échec**, sur Node 24.19.0, avec une API Dust simulée et des données fictives.
+- `npm test` : **29 tests réussis, aucun échec**, sur Node 24.19.0, avec une API Dust simulée et des données fictives.
 - Syntaxe vérifiée avec `node --check` pour `server.mjs`, `dust.mjs`, `public/app.js` et `public/admin.js`.
 - Aucun appel à votre compte Dust, aucun crédit consommé, aucun déploiement Render effectué.
 
@@ -21,9 +21,21 @@ Les tests couvrent notamment :
 - les URL, en-têtes et paramètres envoyés par l’adaptateur Dust, ainsi que le refus des redirections ;
 - le refus de configurations de production non sécurisées.
 
+## Correctif du refus d’accès Dust
+
+- Diagnostic par lecture de la configuration de l’agent, sans génération.
+- Tests du refus `agent_inaccessible` à la création et lors d’un message suivant, sans renvoi automatique.
+- Distinction des statuts désactivés et du refus de lecture de l’agent.
+- Diagnostic réservé à l’administrateur, avec contrôle d’origine, refus des paramètres supplémentaires et limite de fréquence.
+- Aucun quota de question consommé par le diagnostic ; aucune configuration brute renvoyée au navigateur.
+- Normalisation des espaces des variables Dust et conservation de la liste autorisée des origines.
+- Messages lisibles pour le testeur et explication des anciennes erreurs du journal.
+
+La suite complète a réussi avec l’autorisation réseau local. Après interruption de la session, une relance a été bloquée pour les tests HTTP par les permissions système (`listen EPERM` sur 127.0.0.1) ; les tests sans serveur ont réussi.
+
 ## Limites de cette vérification
 
-La vérification visuelle sur ordinateur et téléphone n’a pas pu être effectuée : le navigateur de test n’était pas disponible et son installation a échoué. La mise en page responsive est préparée, mais son rendu doit encore être vérifié dans un navigateur.
+Le nouveau diagnostic a été vérifié dans le navigateur local sur ordinateur : connexion administrateur, affichage du refus d’accès avec les étapes de dépannage, puis affichage du succès de lecture de configuration. Les réponses de Dust étaient simulées. Le rendu sur téléphone n’a pas été vérifié.
 
 Les réponses HTTP de Dust sont simulées conformément aux schémas consultés. Ces essais ne valident pas votre clé API, votre région, les droits de votre workspace, les sources accessibles par votre agent, ses outils ni sa capacité à répondre à vos questions réelles. Le déploiement Render et son disque persistant doivent également être essayés après configuration.
 

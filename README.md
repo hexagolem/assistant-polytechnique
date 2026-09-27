@@ -73,6 +73,26 @@ Ce parcours ne configure pas automatiquement tout le Blueprint. Utilisez :
 
 L’application **refuse de démarrer en production sans disque réellement monté**. Ne contournez pas ce contrôle avec `LOCAL_DEVELOPMENT` : il est réservé à l’ordinateur de développement et interdit sur Render.
 
+## Dépanner `dust_http_400_create_agent_inaccessible`
+
+Cette erreur est renvoyée par Dust lors de l’envoi de la première question. `create` désigne la création de la conversation, **pas la création d’un agent**. Dust refuse l’agent mentionné : il est désactivé, archivé ou inaccessible à la clé API utilisée. Le site ne peut pas accorder lui-même ces droits.
+
+1. Dans Dust, ouvre l’agent visé et vérifie son statut. Réactive-le si nécessaire ; si une source a disparu, corrige ses sources. Pour un agent global retiré, configure un agent encore disponible.
+2. Vérifie son partage : l’agent doit être accessible dans un espace autorisé à la clé API du site. Un agent que tu peux utiliser avec ton compte Dust n’est pas forcément accessible à cette clé.
+3. Dans l’administration Dust, modifie les espaces autorisés de la clé dédiée au site pour inclure ceux nécessaires à l’agent. Il n’est pas nécessaire de rendre l’agent public ni de donner à la clé accès à tout le workspace.
+4. Dans **Render → Environment**, vérifie les valeurs suivantes :
+   - `DUST_AGENT_ID` : le **sId** de l’agent, pas son nom, son URL ou son `id` numérique ;
+   - `DUST_WORKSPACE_ID` : le workspace auquel appartiennent l’agent et la clé ;
+   - `DUST_ORIGIN` : `https://dust.tt` ou `https://eu.dust.tt`, selon l’hébergement réel du workspace (pas le pays du testeur) ;
+   - `DUST_API_KEY` : la clé dédiée correspondante, sans préfixe `Bearer`.
+5. Si tu as changé une variable Render, enregistre puis redéploie. Remplace également les fichiers du dépôt par cette version corrigée.
+6. Connecte-toi à `/admin` et clique sur **Vérifier l’accès Dust**. Le diagnostic lit uniquement la configuration de l’agent, sans envoyer de question ni lancer le modèle. Il distingue les statuts désactivés, le refus d’accès, la clé refusée et l’agent introuvable. Les réponses brutes et la clé restent côté serveur.
+7. Lorsque cette lecture réussit, ouvre une **nouvelle conversation** côté testeur et pose une question simple. Le diagnostic ne valide pas les crédits, l’exécution des outils ou la réponse finale : seule cette question permet de les vérifier.
+
+Les espaces au début et à la fin des variables Dust sont désormais ignorés. La mention « paramètres renseignés » signifie seulement que les variables sont présentes ; elle ne garantit pas les droits. Les anciennes erreurs `agent_inaccessible` du journal sont aussi accompagnées d’une explication.
+
+Sources : [contrôle d’accès dans le code officiel Dust](https://github.com/dust-tt/dust/blob/main/front/lib/api/assistant/conversation.ts), [lecture de la configuration d’un agent](https://docs.dust.tt/api-reference/agents/get-agent-configuration), [espaces autorisés des clés API](https://docs.dust.tt/changelog/api-keys-can-now-be-scoped-to-multiple-spaces).
+
 ## Étape 4 — Inviter et révoquer les testeurs
 
 1. Dans Render, ouvrez votre service, puis **Environment**. Le Blueprint a généré `ADMIN_SECRET`. Consultez cette valeur et conservez-la dans votre gestionnaire de mots de passe. Ne la transmettez pas aux testeurs et ne la copiez pas dans GitHub ou une conversation.

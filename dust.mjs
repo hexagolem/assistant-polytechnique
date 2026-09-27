@@ -3,6 +3,51 @@ export class DustError extends Error {
   constructor(code) { super(code); this.code = code; }
 }
 
+// Fixed, actionable guidance only: never forward Dust's raw error message.
+export function dustDiagnostic(code) {
+  const accessSteps = [
+    'Dans Dust, vérifie que l’agent est actif et partagé dans un espace accessible à la clé API utilisée par le site.',
+    'Dans Dust → administration des clés API, autorise cette clé à accéder aux espaces nécessaires à cet agent.',
+    'Dans Render → Environment, vérifie DUST_AGENT_ID (le sId de l’agent, pas son nom ni son id numérique), DUST_WORKSPACE_ID et DUST_ORIGIN. La clé et l’agent doivent appartenir au même workspace et à la même région.',
+    'Après toute modification des variables Render, redéploie le service puis relance cette vérification.'
+  ];
+  const type = code.replace(/^dust_http_400_(?:create|post|get|cancel|agent)_/, '');
+  if (type === 'agent_inaccessible' || code === 'dust_agent_forbidden') return {
+    message: 'Dust refuse l’accès à l’agent : il est désactivé ou inaccessible à cette clé API.', steps: accessSteps
+  };
+  const disabled = {
+    archived: 'L’agent Dust est archivé. Configure le sId d’un agent actif.',
+    disabled_by_admin: 'L’agent Dust a été désactivé par un administrateur. Réactive-le dans Dust.',
+    disabled_missing_datasource: 'L’agent Dust est désactivé car une source manque. Corrige ses sources dans Dust.',
+    disabled_free_workspace: 'L’agent Dust est désactivé sur ce workspace. Vérifie son abonnement et son statut dans Dust.',
+    pending: 'L’agent Dust est en attente et ne peut pas encore répondre. Termine sa configuration dans Dust.'
+  };
+  if (disabled[code.replace(/^dust_agent_/, '')]) return {
+    message: disabled[code.replace(/^dust_agent_/, '')], steps: accessSteps
+  };
+  if (code === 'dust_not_configured') return {
+    message: 'La configuration Dust est incomplète.',
+    steps: ['Renseigne DUST_API_KEY, DUST_WORKSPACE_ID et DUST_AGENT_ID dans Render → Environment, puis redéploie.']
+  };
+  if (code === 'dust_http_401' || type === 'invalid_api_key_error') return {
+    message: 'Dust refuse la clé API.',
+    steps: ['Remplace DUST_API_KEY dans Render par une clé valide du workspace et de la région choisis, puis redéploie.']
+  };
+  if (code === 'dust_http_403' || type === 'workspace_auth_error' || type === 'permission_error') return {
+    message: 'La clé API n’a pas les droits nécessaires dans Dust.', steps: accessSteps
+  };
+  if (code === 'dust_http_404' || type === 'agent_configuration_not_found' || type === 'workspace_not_found') return {
+    message: 'L’agent ou le workspace est introuvable, ou inaccessible à cette clé.', steps: accessSteps
+  };
+  if (code === 'dust_http_429') return {
+    message: 'Dust limite temporairement les appels API.', steps: ['Attends un peu avant de relancer la vérification.']
+  };
+  return {
+    message: 'La vérification Dust a échoué.',
+    steps: ['Vérifie la disponibilité de Dust et les variables de connexion dans Render. Si le problème persiste, communique le code de diagnostic à l’organisateur.']
+  };
+}
+
 export function latestMessages(conversation) {
   if (!conversation || !Array.isArray(conversation.content)) throw new DustError('dust_format');
   return conversation.content.map(versions => {
@@ -85,7 +130,7 @@ async function badRequestCode(response, stage) {
 }
 
 export function createDustClient(config, fetcher = fetch) {
-  const base = `${config.dustOrigin}/api/v1/w/${encodeURIComponent(config.workspaceId)}/assistant/conversations`;
+  const base = `${config.dustOrigin}/api/v1/w/${encodeURIComponent(config.workspaceId)}/assistant`;
   const id = value => {
     if (typeof value !== 'string' || !/^[a-zA-Z0-9_-]{1,100}$/.test(value)) throw new DustError('dust_format');
     return encodeURIComponent(value);
@@ -99,7 +144,8 @@ export function createDustClient(config, fetcher = fetch) {
       });
       if (!response.ok) {
         if (response.status === 400) {
-          const stage = path === '' ? 'create'
+          const stage = path.startsWith('/agent_configurations/') ? 'agent'
+            : path === '/conversations' ? 'create'
             : path.endsWith('/messages') ? 'post'
             : path.endsWith('/cancel') ? 'cancel' : 'get';
           throw new DustError(await badRequestCode(response, stage));
@@ -121,8 +167,20 @@ export function createDustClient(config, fetcher = fetch) {
     context: {username: 'testeur-polytechnique', timezone: 'Europe/Paris', origin: 'api'}
   });
   return {
+    async checkAgent() {
+      // Read-only: does not create a conversation or run the model.
+      const data = await request('/agent_configurations/' + id(config.agentId) + '?variant=light');
+      const agent = data?.agentConfiguration;
+      if (!agent || agent.sId !== config.agentId) throw new DustError('dust_format');
+      const disabled = ['archived', 'disabled_by_admin', 'disabled_missing_datasource', 'disabled_free_workspace', 'pending'];
+      if (disabled.includes(agent.status)) throw new DustError('dust_agent_' + agent.status);
+      if (!['active', 'draft'].includes(agent.status)) throw new DustError('dust_format');
+      if (agent.canRead === false) throw new DustError('dust_agent_forbidden');
+      // Do not return the agent's instructions, sources or tools to the browser.
+      return {status: agent.status};
+    },
     async create(content) {
-      const data = await request('', 'POST', {
+      const data = await request('/conversations', 'POST', {
         title: 'Test Assistant Polytechnique', message: message(content),
         blocking: false, skipToolsValidation: false
       });
@@ -130,15 +188,15 @@ export function createDustClient(config, fetcher = fetch) {
       return data.conversation;
     },
     async get(conversationId) {
-      const data = await request('/' + id(conversationId));
+      const data = await request('/conversations/' + id(conversationId));
       if (!data.conversation) throw new DustError('dust_format');
       return data.conversation;
     },
     async post(conversationId, content) {
-      await request('/' + id(conversationId) + '/messages', 'POST', message(content));
+      await request('/conversations/' + id(conversationId) + '/messages', 'POST', message(content));
     },
     async cancel(conversationId, messageIds) {
-      if (messageIds.length) await request('/' + id(conversationId) + '/cancel', 'POST', { messageIds });
+      if (messageIds.length) await request('/conversations/' + id(conversationId) + '/cancel', 'POST', { messageIds });
     }
   };
 }
