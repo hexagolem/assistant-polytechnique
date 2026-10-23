@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
-import {createApplication,readConfig} from '../server.mjs';
+import {createApplication,readConfig,assertSupportedRuntime} from '../server.mjs';
 import {createDustClient,latestMessages,DustError} from '../dust.mjs';
 
 const origin='http://localhost:3000';
@@ -106,7 +106,7 @@ test('end-to-end access controls, isolation, unlimited daily questions and retai
       const experienceSource=readFileSync(new URL('../public/experience.js',import.meta.url),'utf8');
       assert.match(experienceSource,/if \(runnerDeadUntil\) resetRunner\(\)/);
       assert.match(experienceSource,/document\.addEventListener\('keydown'[\s\S]*ArrowUp/);
-      for(const path of ['/api.js','/markdown.js','/vendor/markdown-it-15.0.2.mjs']) {
+      for(const path of ['/api.js','/markdown.js','/vendor/markdown-it-15.0.3.mjs']) {
         const asset=await site.request(path);assert.equal(asset.status,200);assert.match(asset.headers.get('content-type'),/javascript/);
       }
     });
@@ -182,6 +182,13 @@ test('Dust adapter follows documented endpoints and does not follow redirects',a
   assert.deepEqual(JSON.parse(requests[3].options.body),{messageIds:['message1']});
   await assert.rejects(()=>client.get('../../credentials'));
   assert.equal(latestMessages({content:[[{sId:'a',version:1},{sId:'b',version:2}]]})[0].sId,'b');
+});
+
+test('production requires the patched Node 24 runtime',()=>{
+  for (const version of ['24.21.0','24.22.0','22.23.4','20.20.0','26.12.1','24.22.1-rc.1','invalid']) {
+    assert.throws(()=>assertSupportedRuntime(version),/24\.22\.1/);
+  }
+  for (const version of ['24.22.1','24.22.2','24.23.0']) assert.doesNotThrow(()=>assertSupportedRuntime(version));
 });
 
 test('production refuses insecure configuration and local mode on Render',()=>{
