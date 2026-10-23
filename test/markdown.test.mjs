@@ -48,3 +48,10 @@ test('plain text and incomplete Markdown remain readable', () => {
     assert.doesNotMatch(result, /undefined|\[object Object\]/);
   }
 });
+
+test('unterminated multiline references render within a bounded time', {timeout:5000}, () => {
+  // Regression for GHSA-gfr2-rv44-r23c: this exercised quadratic work in 15.0.2.
+  for (const source of ['[a]: /u "' + 'x\n'.repeat(100000), '[' + 'a\n'.repeat(100000)]) {
+    assert.equal(typeof renderMarkdown(source), 'string');
+  }
+});

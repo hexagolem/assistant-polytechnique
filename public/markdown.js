@@ -1,4 +1,4 @@
-import MarkdownIt from './vendor/markdown-it-15.0.2.mjs';
+import MarkdownIt from './vendor/markdown-it-15.0.3.mjs';
 
 // Only this configured parser may turn an agent's answer into HTML.
 // Raw HTML and automatic image loading are deliberately not supported.

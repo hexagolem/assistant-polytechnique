@@ -20,9 +20,17 @@ function numberSetting(value, fallback, max) {
   return n;
 }
 
+export function assertSupportedRuntime(version = process.versions.node) {
+  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
+  if (!match || Number(match[1]) !== 24 || Number(match[2]) < 22 || (Number(match[2]) === 22 && Number(match[3]) < 1)) {
+    throw new Error('Node.js 24.22.1 ou une version corrective ultérieure de Node.js 24 est requis.');
+  }
+}
+
 export function readConfig(env = process.env) {
   const local = env.LOCAL_DEVELOPMENT === 'true';
   if (local && env.RENDER) throw new Error('LOCAL_DEVELOPMENT est interdit sur Render.');
+  if (!local) assertSupportedRuntime();
   const origin = env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || (local ? 'http://localhost:3000' : '');
   if (!origin) throw new Error('PUBLIC_ORIGIN doit contenir l’adresse HTTPS du site.');
   const url = new URL(origin);
@@ -90,7 +98,7 @@ export function createApplication(config, dustOverride) {
     ['/app.js', ['app.js','text/javascript; charset=utf-8']],
     ['/api.js', ['api.js','text/javascript; charset=utf-8']],
     ['/markdown.js', ['markdown.js','text/javascript; charset=utf-8']],
-    ['/vendor/markdown-it-15.0.2.mjs', ['vendor/markdown-it-15.0.2.mjs','text/javascript; charset=utf-8']],
+    ['/vendor/markdown-it-15.0.3.mjs', ['vendor/markdown-it-15.0.3.mjs','text/javascript; charset=utf-8']],
     ['/admin.js', ['admin.js','text/javascript; charset=utf-8']],
     ['/alumnix.css', ['alumnix.css','text/css; charset=utf-8']],
     ['/experience.js', ['experience.js','text/javascript; charset=utf-8']],
